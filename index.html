@@ -1,629 +1,312 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>🌍 Ultimate Country Simulator</title>
+  <title>2.5D Mini Minecraft</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
     body {
-      background: #1a1a2e;
-      color: #e6e6e6;
-      min-height: 100vh;
-      padding: 20px;
+      margin: 0;
+      overflow: hidden;
+      background: #87CEEB;
+      font-family: Arial, sans-serif;
     }
 
-    .game-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: 250px 1fr;
-      gap: 20px;
+    #game {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background: linear-gradient(to bottom, #87CEEB 0%, #E0F6FF 70%, #D2B48C 100%);
     }
 
-    .sidebar {
-      background: #16213e;
-      padding: 20px;
-      border-radius: 15px;
-      height: fit-content;
-    }
-
-    .main-panel {
-      display: grid;
-      grid-template-rows: auto 1fr auto;
-      gap: 20px;
-    }
-
-    .header {
-      background: #0f3460;
-      padding: 20px;
-      border-radius: 15px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-      margin-top: 15px;
-    }
-
-    .stat-box {
-      background: #16213e;
-      padding: 15px;
-      border-radius: 10px;
-      text-align: center;
-    }
-
-    .stat-value {
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: #e94560;
-    }
-
-    .event-log {
-      background: #16213e;
-      padding: 20px;
-      border-radius: 15px;
-      height: 200px;
-      overflow-y: auto;
-      font-size: 0.95rem;
-      line-height: 1.5;
-    }
-
-    .event-item {
-      padding: 8px 0;
-      border-bottom: 1px solid #2a2a4a;
-    }
-
-    .event-item.negative { color: #ff6b6b; }
-    .event-item.positive { color: #50fa7b; }
-    .event-item.neutral { color: #ffd700; }
-
-    .decisions {
-      background: #0f3460;
-      padding: 20px;
-      border-radius: 15px;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 15px;
-    }
-
-    .decision-card {
-      background: #16213e;
-      padding: 15px;
-      border-radius: 10px;
+    .block {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      background-size: cover;
+      box-shadow: inset -5px -5px 10px rgba(0,0,0,0.3);
+      transition: transform 0.1s;
       cursor: pointer;
-      transition: all 0.3s;
-      border: 2px solid transparent;
     }
 
-    .decision-card:hover {
-      transform: translateY(-5px);
-      border-color: #533483;
+    .player {
+      position: absolute;
+      width: 40px;
+      height: 80px;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="80" viewBox="0 0 40 80"><rect x="10" y="0" width="20" height="20" fill="%23FF0000"/><rect x="5" y="20" width="30" height="30" fill="%23333"/><rect x="10" y="50" width="20" height="30" fill="%23000"/></svg>') no-repeat center;
+      z-index: 100;
+      transition: all 0.2s ease;
     }
 
-    .decision-card h4 {
-      margin-bottom: 10px;
-      color: #533483;
+    #ui {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 15px;
+      border-radius: 10px;
+      font-size: 14px;
+      z-index: 200;
     }
 
-    .decision-cost {
-      font-size: 0.9rem;
-      color: #ff6b6b;
-    }
-
-    .tabs {
+    #inventory {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
       display: flex;
       gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    .tab-btn {
-      background: #16213e;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      color: #e6e6e6;
-    }
-
-    .tab-btn.active {
-      background: #533483;
-    }
-
-    .tab-content {
-      display: none;
-    }
-
-    .tab-content.active {
-      display: block;
-    }
-
-    button {
-      background: #e94560;
-      color: white;
-      border: none;
-      padding: 12px 25px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-      margin: 5px;
-    }
-
-    button:hover {
-      background: #ff6b6b;
-    }
-
-    .chart-container {
-      height: 200px;
-      background: #16213e;
+      background: rgba(0,0,0,0.7);
+      padding: 10px;
       border-radius: 10px;
-      padding: 15px;
-      margin-top: 20px;
+      z-index: 200;
     }
 
-    @media (max-width: 768px) {
-      .game-container {
-        grid-template-columns: 1fr;
-      }
+    .inv-item {
+      width: 40px;
+      height: 40px;
+      background-size: cover;
+      border: 3px solid transparent;
+      cursor: pointer;
+    }
+
+    .inv-item.selected {
+      border-color: gold;
+      box-shadow: 0 0 10px gold;
+    }
+
+    #instructions {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 15px;
+      border-radius: 10px;
+      font-size: 12px;
+      max-width: 200px;
+      z-index: 200;
     }
   </style>
 </head>
 <body>
-  <div class="game-container">
-    <div class="sidebar">
-      <h2>Cumhurbaşkanı</h2>
-      <div class="stat-box">
-        <div>Gün</div>
-        <div class="stat-value" id="day">1</div>
-      </div>
-      <div class="stat-box">
-        <div>Para</div>
-        <div class="stat-value" id="money">$<span id="money-val">1000</span>M</div>
-      </div>
-      <div class="stat-box">
-        <div>Kamuoyu</div>
-        <div class="stat-value" id="approval">65%</div>
-      </div>
-      <div class="stat-box">
-        <div>İstikrar</div>
-        <div class="stat-value" id="stability">80%</div>
-      </div>
+  <div id="game">
+    <div class="player" id="player"></div>
+  </div>
 
-      <div class="tabs">
-        <button class="tab-btn active" data-tab="economy">Ekonomi</button>
-        <button class="tab-btn" data-tab="politics">Siyaset</button>
-        <button class="tab-btn" data-tab="foreign">Dış Politika</button>
-      </div>
+  <div id="ui">
+    <div>📍 X: <span id="posX">0</span> Y: <span id="posY">0</span></div>
+    <div>🧱 Seçili Blok: <span id="selectedBlock">Toprak</span></div>
+    <button id="saveBtn">💾 Kaydet</button>
+    <button id="loadBtn">📂 Yükle</button>
+  </div>
 
-      <div id="economy-tab" class="tab-content active">
-        <h3>📉 Ekonomi</h3>
-        <p>Enflasyon: <span id="inflation">5%</span></p>
-        <p>İşsizlik: <span id="unemployment">8%</span></p>
-        <p>Büyüme: <span id="growth">2%</span></p>
-        <p>Borç: <span id="debt">$<span>500</span>M</span></p>
-      </div>
+  <div id="inventory">
+    <!-- JS ile doldurulacak -->
+  </div>
 
-      <div id="politics-tab" class="tab-content">
-        <h3>🏛️ Siyaset</h3>
-        <p>Meclis Desteği: <span id="parliament">55%</span></p>
-        <p>Basın Özgürlüğü: <span id="press">70%</span></p>
-        <p>Seçim Sayısı: <span id="elections">0</span></p>
-      </div>
-
-      <div id="foreign-tab" class="tab-content">
-        <h3>🌐 Dış Politika</h3>
-        <p>AB İlişkileri: <span id="eu">40%</span></p>
-        <p>ABD İlişkileri: <span id="usa">60%</span></p>
-        <p>Rusya İlişkileri: <span id="russia">50%</span></p>
-        <p>Göçmenler: <span id="refugees">100K</span></p>
-      </div>
-
-      <button id="nextDay">⏭️ Sonraki Gün</button>
-      <button id="saveGame">💾 Kaydet</button>
-      <button id="loadGame">📂 Yükle</button>
-    </div>
-
-    <div class="main-panel">
-      <div class="header">
-        <h1>TÜRKİYE — ULTIMATE COUNTRY SIMULATOR</h1>
-        <div>
-          <button id="startElection">🗳️ Seçim Başlat</button>
-          <button id="emergency">🚨 Olağanüstü Hal</button>
-        </div>
-      </div>
-
-      <div class="event-log" id="eventLog">
-        <div class="event-item neutral">Cumhurbaşkanı olarak göreve başladınız. Ülke 100 milyon nüfuslu, orta gelirli bir ülkede.</div>
-        <div class="event-item positive">Merkez Bankası, enflasyonu kontrol altına aldı.</div>
-        <div class="event-item negative">Tarım sektöründe kuraklık başladı.</div>
-      </div>
-
-      <div class="decisions" id="decisions">
-        <!-- JS ile doldurulacak -->
-      </div>
-    </div>
+  <div id="instructions">
+    <strong>🎮 KONTROLLER:</strong><br>
+    - WASD: Hareket<br>
+    - FARE: Blok seç<br>
+    - SOL TIK: Blok yerleştir<br>
+    - SAĞ TIK: Blok kır<br>
+    - 1-4: Envanter değiştir
   </div>
 
   <script>
-    // Game State
+    // Basit 2.5D Mini Minecraft
+    const game = document.getElementById('game');
+    const player = document.getElementById('player');
+    const posX = document.getElementById('posX');
+    const posY = document.getElementById('posY');
+    const selectedBlockEl = document.getElementById('selectedBlock');
+    const inventoryEl = document.getElementById('inventory');
+
+    // Oyun durumu
     let gameState = {
-      day: 1,
-      money: 1000, // Milyon $
-      approval: 65,
-      stability: 80,
-      inflation: 5,
-      unemployment: 8,
-      growth: 2,
-      debt: 500,
-      parliament: 55,
-      press: 70,
-      elections: 0,
-      eu: 40,
-      usa: 60,
-      russia: 50,
-      refugees: 100,
-      policies: [],
-      events: [],
-      crisisLevel: 0,
-      coupRisk: 0,
-      lastElectionDay: 0,
-      ministers: {
-        economy: "Ahmet Yılmaz",
-        foreign: "Ayşe Kaya",
-        interior: "Mehmet Demir"
-      }
+      playerX: 400,
+      playerY: 300,
+      blocks: [],
+      inventory: [
+        { type: 'dirt', name: 'Toprak', color: '#8B4513' },
+        { type: 'grass', name: 'Çim', color: '#567D46' },
+        { type: 'stone', name: 'Taş', color: '#808080' },
+        { type: 'wood', name: 'Tahta', color: '#8B4513' }
+      ],
+      selectedSlot: 0
     };
 
-    // DOM Elements
-    const dayEl = document.getElementById('day');
-    const moneyEl = document.getElementById('money-val');
-    const approvalEl = document.getElementById('approval');
-    const stabilityEl = document.getElementById('stability');
-    const inflationEl = document.getElementById('inflation');
-    const unemploymentEl = document.getElementById('unemployment');
-    const growthEl = document.getElementById('growth');
-    const debtEl = document.getElementById('debt').querySelector('span');
-    const parliamentEl = document.getElementById('parliament');
-    const pressEl = document.getElementById('press');
-    const electionsEl = document.getElementById('elections');
-    const euEl = document.getElementById('eu');
-    const usaEl = document.getElementById('usa');
-    const russiaEl = document.getElementById('russia');
-    const refugeesEl = document.getElementById('refugees');
-    const eventLog = document.getElementById('eventLog');
-    const decisionsContainer = document.getElementById('decisions');
-    const nextDayBtn = document.getElementById('nextDay');
-    const saveGameBtn = document.getElementById('saveGame');
-    const loadGameBtn = document.getElementById('loadGame');
-    const startElectionBtn = document.getElementById('startElection');
-    const emergencyBtn = document.getElementById('emergency');
+    // Texture generator (data URL ile)
+    function generateTexture(color) {
+      return `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='50' height='50' viewBox='0 0 50 50'><rect width='50' height='50' fill='${color}'/><rect x='0' y='0' width='50' height='5' fill='rgba(0,0,0,0.2)'/><rect x='0' y='0' width='5' height='50' fill='rgba(0,0,0,0.2)'/></svg>`;
+    }
 
-    // Tab System
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.addEventListener('click', function() {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        this.classList.add('active');
-        document.getElementById(this.dataset.tab + '-tab').classList.add('active');
+    // Render player
+    function renderPlayer() {
+      player.style.left = gameState.playerX + 'px';
+      player.style.top = gameState.playerY + 'px';
+      posX.textContent = Math.floor(gameState.playerX / 50);
+      posY.textContent = Math.floor(gameState.playerY / 50);
+    }
+
+    // Render blocks
+    function renderBlocks() {
+      // Mevcut blokları temizle (performans için optimize edilebilir)
+      document.querySelectorAll('.block').forEach(b => b.remove());
+
+      gameState.blocks.forEach(block => {
+        const el = document.createElement('div');
+        el.className = 'block';
+        el.style.left = block.x + 'px';
+        el.style.top = block.y + 'px';
+        el.style.backgroundImage = `url(${generateTexture(block.color)})`;
+        el.dataset.id = block.id;
+
+        // Blok etkileşimi
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (e.button === 0) {
+            // Sol tık: Yerleştir (yeni blok)
+            placeBlock(block.x, block.y - 50);
+          } else if (e.button === 2) {
+            // Sağ tık: Kır
+            removeBlock(block.id);
+          }
+        });
+
+        el.addEventListener('contextmenu', (e) => e.preventDefault());
+
+        game.appendChild(el);
       });
+    }
+
+    // Blok ekle
+    function placeBlock(x, y) {
+      const selected = gameState.inventory[gameState.selectedSlot];
+      const id = Date.now() + Math.random();
+      gameState.blocks.push({
+        id,
+        x,
+        y,
+        type: selected.type,
+        color: selected.color
+      });
+      renderBlocks();
+    }
+
+    // Blok kaldır
+    function removeBlock(id) {
+      gameState.blocks = gameState.blocks.filter(b => b.id !== id);
+      renderBlocks();
+    }
+
+    // Envanteri render et
+    function renderInventory() {
+      inventoryEl.innerHTML = '';
+      gameState.inventory.forEach((item, index) => {
+        const el = document.createElement('div');
+        el.className = `inv-item ${index === gameState.selectedSlot ? 'selected' : ''}`;
+        el.style.backgroundImage = `url(${generateTexture(item.color)})`;
+        el.dataset.slot = index;
+        el.addEventListener('click', () => {
+          gameState.selectedSlot = index;
+          selectedBlockEl.textContent = item.name;
+          renderInventory();
+        });
+        inventoryEl.appendChild(el);
+      });
+    }
+
+    // Hareket
+    document.addEventListener('keydown', (e) => {
+      const speed = 10;
+      switch(e.key.toLowerCase()) {
+        case 'w': gameState.playerY = Math.max(0, gameState.playerY - speed); break;
+        case 's': gameState.playerY += speed; break;
+        case 'a': gameState.playerX = Math.max(0, gameState.playerX - speed); break;
+        case 'd': gameState.playerX += speed; break;
+        case '1': gameState.selectedSlot = 0; selectedBlockEl.textContent = gameState.inventory[0].name; renderInventory(); break;
+        case '2': gameState.selectedSlot = 1; selectedBlockEl.textContent = gameState.inventory[1].name; renderInventory(); break;
+        case '3': gameState.selectedSlot = 2; selectedBlockEl.textContent = gameState.inventory[2].name; renderInventory(); break;
+        case '4': gameState.selectedSlot = 3; selectedBlockEl.textContent = gameState.inventory[3].name; renderInventory(); break;
+      }
+      renderPlayer();
     });
 
-    // Decision Cards (Politikalar)
-    const policyDeck = [
-      {
-        title: "Vergi İndirimi",
-        desc: "Tüketici harcamalarını artırır ama bütçe açığı yaratır.",
-        cost: "Bütçe -100M, Borç +100M",
-        effect: () => {
-          gameState.money -= 100;
-          gameState.debt += 100;
-          gameState.approval = Math.min(100, gameState.approval + 5);
-          gameState.growth += 1;
-          logEvent("Cumhurbaşkanlığı, tüketici vergilerini düşürdü. Halk memnun, bütçe daraldı.", "positive");
-        }
-      },
-      {
-        title: "Kamu Personeli Alımı",
-        desc: "İşsizliği azaltır ama maliyetli.",
-        cost: "Bütçe -150M",
-        effect: () => {
-          gameState.money -= 150;
-          gameState.unemployment = Math.max(0, gameState.unemployment - 2);
-          gameState.approval = Math.min(100, gameState.approval + 7);
-          logEvent("10.000 yeni kamu görevlisi atandı. İşsizlik düştü!", "positive");
-        }
-      },
-      {
-        title: "Yabancı Yatırımcı Çek",
-        desc: "Ekonomiyi canlandırır ama bağımlılık yaratır.",
-        cost: "ABD +10, Rusya -5",
-        effect: () => {
-          gameState.usa = Math.min(100, gameState.usa + 10);
-          gameState.russia = Math.max(0, gameState.russia - 5);
-          gameState.money += 200;
-          gameState.growth += 2;
-          logEvent("Yeni teknoloji yatırımı için ABD ile anlaşma yapıldı.", "positive");
-        }
-      },
-      {
-        title: "Basın Yasası",
-        desc: "Muhalif sesleri bastırır ama kamuoyu düşer.",
-        cost: "Basın Özgürlüğü -20",
-        effect: () => {
-          gameState.press = Math.max(0, gameState.press - 20);
-          gameState.approval = Math.max(0, gameState.approval - 10);
-          gameState.stability = Math.min(100, gameState.stability + 5);
-          logEvent("Yeni basın yasası: 'Yalan haber' tanımı genişletildi.", "negative");
-        }
-      },
-      {
-        title: "Göçmen Geri Gönderme",
-        desc: "Kısa vadede popüler ama diplomatik kriz.",
-        cost: "AB -15, Rusya -10",
-        effect: () => {
-          gameState.eu = Math.max(0, gameState.eu - 15);
-          gameState.russia = Math.max(0, gameState.russia - 10);
-          gameState.refugees = Math.max(0, gameState.refugees - 30);
-          gameState.approval = Math.min(100, gameState.approval + 8);
-          logEvent("50.000 göçmen sınır dışı edildi. Halk alkışladı, AB kızdı.", "neutral");
-        }
-      },
-      {
-        title: "Enflasyonla Mücadele",
-        desc: "Faizleri artır, para arzını kısıtla.",
-        cost: "Büyüme -2, İşsizlik +3",
-        effect: () => {
-          gameState.inflation = Math.max(0, gameState.inflation - 3);
-          gameState.growth = Math.max(-5, gameState.growth - 2);
-          gameState.unemployment = Math.min(30, gameState.unemployment + 3);
-          logEvent("Merkez Bankası faizleri %5 artırdı. Enflasyon düştü ama büyüme durdu.", "neutral");
-        }
-      },
-      {
-        title: "Askeri Darbe Önleme",
-        desc: "Generallere rüşvet, istihbaratı güçlendir.",
-        cost: "Bütçe -200M, İstikrar +15",
-        effect: () => {
-          gameState.money -= 200;
-          gameState.stability = Math.min(100, gameState.stability + 15);
-          gameState.coupRisk = Math.max(0, gameState.coupRisk - 30);
-          logEvent("Askeri istihbarat birimi güçlendirildi. Darbe riski azaldı.", "positive");
-        }
-      },
-      {
-        title: "Yolsuzlukla Mücadele",
-        desc: "Halkın güvenini artırır ama siyasi maliyeti yüksek.",
-        cost: "Meclis Desteği -20",
-        effect: () => {
-          gameState.parliament = Math.max(0, gameState.parliament - 20);
-          gameState.approval = Math.min(100, gameState.approval + 15);
-          gameState.press = Math.min(100, gameState.press + 10);
-          logEvent("Büyük yolsuzluk operasyonu! 5 bakan gözaltında.", "positive");
+    // Fare ile blok ekleme (oyuncunun önünde)
+    game.addEventListener('click', (e) => {
+      if (e.target === game) {
+        const rect = game.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        // Oyuncuya en yakın 50px grid noktasına yerleştir
+        const gridX = Math.round((x - gameState.playerX) / 50) * 50 + gameState.playerX;
+        const gridY = Math.round((y - gameState.playerY) / 50) * 50 + gameState.playerY;
+
+        if (Math.abs(gridX - gameState.playerX) <= 100 && Math.abs(gridY - gameState.playerY) <= 100) {
+          placeBlock(gridX, gridY);
         }
       }
-    ];
+    });
 
-    // Random Events
-    const randomEvents = [
-      {
-        condition: () => gameState.day % 7 === 0,
-        trigger: () => {
-          logEvent("Cumhurbaşkanı, halka doğrudan hitap etti: 'Güçlü Türkiye hedefindeyiz!'", "positive");
-          gameState.approval = Math.min(100, gameState.approval + 3);
-        }
-      },
-      {
-        condition: () => gameState.inflation > 15,
-        trigger: () => {
-          logEvent("⚠️ ENFLASYON KRİZİ: Halk marketlerde fiyat etiketlerini takip ediyor!", "negative");
-          gameState.approval = Math.max(0, gameState.approval - 5);
-          gameState.stability = Math.max(0, gameState.stability - 5);
-        }
-      },
-      {
-        condition: () => gameState.unemployment > 15,
-        trigger: () => {
-          logEvent("⚠️ GENÇLER SOKAKTA: 'İş yok, umut yok' protestoları başladı.", "negative");
-          gameState.approval = Math.max(0, gameState.approval - 7);
-          gameState.stability = Math.max(0, gameState.stability - 10);
-        }
-      },
-      {
-        condition: () => gameState.press < 30,
-        trigger: () => {
-          logEvent("⚠️ MEDYA KRİZİ: 3 büyük gazete kapatıldı. Uluslararası tepkiler arttı.", "negative");
-          gameState.usa = Math.max(0, gameState.usa - 10);
-          gameState.eu = Math.max(0, gameState.eu - 15);
-        }
-      },
-      {
-        condition: () => gameState.coupRisk > 50,
-        trigger: () => {
-          logEvent("🚨 DARBE TEHDİDİ: Askeri birlikler başkente doğru hareket ediyor!", "negative");
-          gameState.stability = Math.max(0, gameState.stability - 20);
-          if (Math.random() < 0.3 && gameState.stability < 30) {
-            alert("💥 DARBE BAŞARILI! Oyunu kaybettiniz.");
-            resetGame();
-          }
-        }
-      },
-      {
-        condition: () => gameState.day % 30 === 0 && gameState.elections < 3,
-        trigger: () => {
-          logEvent("🗳️ SEÇİM ZAMANI: Halk sandık başına gidiyor...", "neutral");
-          setTimeout(() => holdElection(), 2000);
-        }
-      },
-      {
-        condition: () => Math.random() < 0.05,
-        trigger: () => {
-          const disasters = [
-            "🌋 Ege’de volkanik aktivite! Turizm sektörü çöktü. -50M$",
-            "🦠 SALGIN: Hastaneler doldu. Sağlık bütçesi +100M$",
-            "💧 KURAKLIK: Tarım üretimi yarıya düştü. Gıda fiyatları +20%",
-            "🛢️ ALTIN BULUNDU: Doğu Anadolu’da yeni maden! +300M$"
-          ];
-          const event = disasters[Math.floor(Math.random() * disasters.length)];
-          logEvent(`🌍 RASTGELE OLAY: ${event}`, event.includes("ALTIN") ? "positive" : "negative");
-          
-          if (event.includes("ALTIN")) gameState.money += 300;
-          if (event.includes("KURAKLIK")) gameState.inflation += 5;
-          if (event.includes("SALGIN")) gameState.money -= 100;
-          if (event.includes("volkanik")) gameState.money -= 50;
+    // Sağ tık engelle
+    game.addEventListener('contextmenu', (e) => {
+      if (e.target === game) {
+        e.preventDefault();
+        const rect = game.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        // En yakın bloğu bul ve kaldır
+        const closest = gameState.blocks.reduce((prev, curr) => {
+          const prevDist = Math.hypot(prev.x - x, prev.y - y);
+          const currDist = Math.hypot(curr.x - x, curr.y - y);
+          return currDist < prevDist ? curr : prev;
+        }, gameState.blocks[0] || null);
+
+        if (closest && Math.hypot(closest.x - x, closest.y - y) < 60) {
+          removeBlock(closest.id);
         }
       }
-    ];
+    });
 
-    // Functions
-    function logEvent(text, type = "neutral") {
-      const div = document.createElement('div');
-      div.className = `event-item ${type}`;
-      div.textContent = `Gün ${gameState.day}: ${text}`;
-      eventLog.prepend(div);
-      if (eventLog.children.length > 50) eventLog.removeChild(eventLog.lastChild);
-    }
+    // Kaydet / Yükle
+    document.getElementById('saveBtn').addEventListener('click', () => {
+      localStorage.setItem('miniMinecraft', JSON.stringify(gameState));
+      alert('🌍 Dünya kaydedildi!');
+    });
 
-    function renderGame() {
-      dayEl.textContent = gameState.day;
-      moneyEl.textContent = gameState.money;
-      approvalEl.textContent = `${gameState.approval}%`;
-      stabilityEl.textContent = `${gameState.stability}%`;
-      inflationEl.textContent = `${gameState.inflation}%`;
-      unemploymentEl.textContent = `${gameState.unemployment}%`;
-      growthEl.textContent = `${gameState.growth}%`;
-      debtEl.textContent = gameState.debt;
-      parliamentEl.textContent = `${gameState.parliament}%`;
-      pressEl.textContent = `${gameState.press}%`;
-      electionsEl.textContent = gameState.elections;
-      euEl.textContent = `${gameState.eu}%`;
-      usaEl.textContent = `${gameState.usa}%`;
-      russiaEl.textContent = `${gameState.russia}%`;
-      refugeesEl.textContent = `${gameState.refugees}K`;
-
-      // Render decisions
-      decisionsContainer.innerHTML = '';
-      policyDeck.slice(0, 6).map(policy => {
-        const card = document.createElement('div');
-        card.className = 'decision-card';
-        card.innerHTML = `
-          <h4>${policy.title}</h4>
-          <p>${policy.desc}</p>
-          <p class="decision-cost">${policy.cost}</p>
-        `;
-        card.addEventListener('click', () => {
-          if (gameState.money < 0 && policy.title.includes("Bütçe")) {
-            alert("Cumhurbaşkanım, hazinede para yok!");
-            return;
-          }
-          policy.effect();
-          renderGame();
-        });
-        decisionsContainer.appendChild(card);
-      });
-    }
-
-    function nextDay() {
-      gameState.day++;
-
-      // Daily auto-changes
-      gameState.money += Math.floor(gameState.growth * 10); // GDP growth effect
-      gameState.inflation += (Math.random() - 0.5) * 0.5; // Random inflation fluctuation
-      gameState.inflation = Math.max(0, gameState.inflation);
-      gameState.crisisLevel = Math.max(0, gameState.crisisLevel - 1);
-      gameState.coupRisk = Math.max(0, gameState.coupRisk - 1);
-
-      // Trigger random events
-      randomEvents.forEach(event => {
-        if (event.condition()) event.trigger();
-      });
-
-      // Auto crisis if approval < 30
-      if (gameState.approval < 30) {
-        gameState.coupRisk += 2;
-        gameState.stability = Math.max(0, gameState.stability - 1);
-      }
-
-      renderGame();
-    }
-
-    function holdElection() {
-      const baseChance = 40;
-      const approvalBonus = gameState.approval * 0.6;
-      const economyBonus = (10 - gameState.unemployment) * 2;
-      const stabilityBonus = gameState.stability * 0.3;
-      const totalChance = baseChance + approvalBonus + economyBonus + stabilityBonus;
-
-      const won = Math.random() * 100 < totalChance;
-
-      if (won) {
-        gameState.elections++;
-        gameState.approval = Math.min(100, gameState.approval + 10);
-        logEvent(`🎉 SEÇİM ZAFERİ! ${gameState.elections}. kez cumhurbaşkanı seçildiniz.`, "positive");
-      } else {
-        logEvent("💀 SEÇİMİ KAYBETTİNİZ! Muhalefet iktidarı devraldı.", "negative");
-        alert("Cumhurbaşkanlığı göreviniz sona erdi. Oyun bitti.");
-        resetGame();
-      }
-    }
-
-    function declareEmergency() {
-      if (gameState.stability < 40) {
-        alert("Cumhurbaşkanım, istikrar çok düşük. OHAL ilan edemezsiniz!");
-        return;
-      }
-      gameState.stability = Math.min(100, gameState.stability + 20);
-      gameState.press = Math.max(0, gameState.press - 30);
-      gameState.approval = Math.max(0, gameState.approval - 15);
-      logEvent("🚨 OLAĞANÜSTÜ HAL İLAN EDİLDİ! Basın sansürü, seyahat yasağı.", "negative");
-      renderGame();
-    }
-
-    function saveGame() {
-      localStorage.setItem('countrySim', JSON.stringify(gameState));
-      alert("Cumhurbaşkanı, devletin durumu arşivlendi. 💾");
-    }
-
-    function loadGame() {
-      const saved = localStorage.getItem('countrySim');
+    document.getElementById('loadBtn').addEventListener('click', () => {
+      const saved = localStorage.getItem('miniMinecraft');
       if (saved) {
         gameState = JSON.parse(saved);
-        alert("Cumhurbaşkanı, arşivden devam ediliyor. 📂");
-        renderGame();
+        renderPlayer();
+        renderBlocks();
+        renderInventory();
+        alert('🌎 Dünya yüklendi!');
       } else {
-        alert("Arşiv bulunamadı. Yeni bir cumhuriyet kurun!");
+        alert('Kayıtlı dünya bulunamadı.');
       }
+    });
+
+    // Başlangıç blokları
+    for (let i = -5; i <= 5; i++) {
+      gameState.blocks.push({
+        id: `ground-${i}`,
+        x: 400 + i * 50,
+        y: 400,
+        type: 'grass',
+        color: '#567D46'
+      });
     }
 
-    function resetGame() {
-      gameState = {
-        day: 1, money: 1000, approval: 65, stability: 80, inflation: 5,
-        unemployment: 8, growth: 2, debt: 500, parliament: 55, press: 70,
-        elections: 0, eu: 40, usa: 60, russia: 50, refugees: 100,
-        policies: [], events: [], crisisLevel: 0, coupRisk: 0, lastElectionDay: 0,
-        ministers: { economy: "Ahmet Yılmaz", foreign: "Ayşe Kaya", interior: "Mehmet Demir" }
-      };
-      renderGame();
-    }
-
-    // Event Listeners
-    nextDayBtn.addEventListener('click', nextDay);
-    saveGameBtn.addEventListener('click', saveGame);
-    loadGameBtn.addEventListener('click', loadGame);
-    startElectionBtn.addEventListener('click', holdElection);
-    emergencyBtn.addEventListener('click', declareEmergency);
-
-    // Initialize
-    renderGame();
+    // Render initial state
+    renderPlayer();
+    renderBlocks();
+    renderInventory();
   </script>
 </body>
 </html>
