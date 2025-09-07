@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>📸 Fotoğraf Film Simülatörü</title>
+  <title>🖼️ Web Fotoğraf Düzenleyici</title>
   <style>
     * {
       margin: 0;
@@ -13,41 +13,47 @@
     }
 
     body {
-      background: #1e1e2e;
+      background: #0f0f1a;
       color: white;
       min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 20px;
+    }
+
+    .sidebar {
+      background: #1a1a2e;
+      padding: 20px;
+      border-radius: 15px;
+      height: fit-content;
+      overflow-y: auto;
+      max-height: 90vh;
+    }
+
+    .preview-area {
+      background: #16213e;
+      border-radius: 15px;
       padding: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 800px;
-      background: rgba(30,30,46,0.8);
-      backdrop-filter: blur(10px);
-      border-radius: 20px;
-      padding: 30px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-      text-align: center;
-    }
-
-    h1 {
-      font-size: 2.2rem;
-      margin-bottom: 20px;
-      background: linear-gradient(90deg, #ff9a9e, #fecfef);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      position: relative;
     }
 
     .upload-area {
       border: 3px dashed #555;
       padding: 40px 20px;
       border-radius: 15px;
-      margin: 20px 0;
+      margin-bottom: 20px;
       cursor: pointer;
       transition: all 0.3s;
+      text-align: center;
     }
 
     .upload-area:hover {
@@ -55,183 +61,232 @@
       background: rgba(255,107,107,0.1);
     }
 
-    .upload-area.dragover {
-      border-color: #50fa7b;
-      background: rgba(80,250,123,0.1);
-    }
-
     #preview {
       max-width: 100%;
-      max-height: 400px;
-      margin: 20px auto;
-      display: none;
+      max-height: 70vh;
       border-radius: 10px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.5);
       position: relative;
+      display: none;
     }
 
-    .filters {
-      display: flex;
-      flex-wrap: wrap;
+    .controls h3 {
+      margin: 20px 0 10px 0;
+      color: #533483;
+      border-bottom: 2px solid #533483;
+      padding-bottom: 5px;
+    }
+
+    .slider-group {
+      margin: 15px 0;
+    }
+
+    .slider-group label {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .slider-group input {
+      width: 100%;
+    }
+
+    button {
+      background: #e94560;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      margin: 10px 5px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+
+    button:hover {
+      background: #ff6b6b;
+    }
+
+    .filter-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
       gap: 10px;
-      justify-content: center;
-      margin: 20px 0;
+      margin: 15px 0;
     }
 
     .filter-btn {
       background: #333;
       color: white;
       border: none;
-      padding: 10px 15px;
-      border-radius: 8px;
+      padding: 8px;
+      border-radius: 5px;
       cursor: pointer;
+      font-size: 0.9rem;
       transition: all 0.3s;
     }
 
     .filter-btn:hover, .filter-btn.active {
-      background: #ff6b6b;
+      background: #533483;
       transform: translateY(-2px);
     }
 
-    .controls {
-      margin: 20px 0;
-    }
-
-    button {
-      background: #ff6b6b;
-      color: white;
-      border: none;
-      padding: 15px 30px;
-      margin: 10px;
-      border-radius: 50px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 10px rgba(255,107,107,0.4);
-    }
-
-    button:hover {
-      background: #ff5252;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 15px rgba(255,107,107,0.6);
-    }
-
-    .polaroid-date {
-      position: absolute;
-      bottom: 10px;
-      right: 15px;
-      background: rgba(0,0,0,0.5);
-      color: white;
-      padding: 5px 10px;
+    .text-input {
+      width: 100%;
+      padding: 8px;
+      margin: 10px 0;
       border-radius: 5px;
-      font-size: 0.8rem;
+      border: 1px solid #555;
+      background: #222;
+      color: white;
+    }
+
+    .color-picker {
+      width: 100%;
+      margin: 10px 0;
+    }
+
+    #textElement {
+      position: absolute;
+      color: white;
+      font-size: 30px;
+      cursor: move;
+      user-select: none;
+      z-index: 10;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .crop-area {
+      position: absolute;
+      border: 2px dashed yellow;
+      cursor: move;
       display: none;
     }
 
-    /* Efektler */
-    .effect-1998 {
-      filter: contrast(1.2) saturate(0.8) brightness(0.9);
-      image-rendering: pixelated;
-      transform: scale(0.98);
-      animation: shake 5s infinite;
-    }
-
-    .effect-polaroid {
-      border: 20px solid white;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-      transform: rotate(-3deg);
-      position: relative;
-    }
-
-    .effect-vhs {
-      filter: saturate(0.7) contrast(1.1);
-      animation: vhs 2s infinite;
-    }
-
-    .effect-lomo {
-      filter: contrast(1.3) saturate(1.5) sepia(0.2);
-    }
-
-    .effect-kodak {
-      filter: brightness(1.1) contrast(1.05) saturate(1.2);
-      box-shadow: 0 0 30px rgba(255,215,0,0.3);
-    }
-
-    .effect-fuji {
-      filter: saturate(1.3) contrast(1.1) hue-rotate(5deg);
-    }
-
-    /* Animations */
-    @keyframes shake {
-      0%, 100% { transform: translateX(0) scale(0.98); }
-      25% { transform: translateX(-2px) scale(0.98); }
-      75% { transform: translateX(2px) scale(0.98); }
-    }
-
-    @keyframes vhs {
-      0%, 100% { transform: translateX(0); filter: saturate(0.7) contrast(1.1); }
-      50% { transform: translateX(1px); filter: saturate(0.7) contrast(1.1) brightness(1.05); }
-    }
-
-    @media (max-width: 600px) {
-      .container { padding: 20px; }
-      h1 { font-size: 1.8rem; }
+    @media (max-width: 768px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        max-height: 30vh;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>📸 Fotoğraf Film Simülatörü</h1>
-    <div class="upload-area" id="uploadArea">
-      <p>📷 Fotoğrafını sürükle veya tıkla</p>
-      <input type="file" id="fileInput" accept="image/*" style="display:none" />
+    <div class="sidebar">
+      <h2>🎨 Fotoğraf Düzenleyici</h2>
+
+      <div class="controls">
+        <h3>🔧 Temel Ayarlar</h3>
+        <div class="slider-group">
+          <label>Parlaklık: <span id="brightVal">0</span></label>
+          <input type="range" id="brightness" min="-100" max="100" value="0">
+        </div>
+        <div class="slider-group">
+          <label>Kontrast: <span id="contrastVal">0</span></label>
+          <input type="range" id="contrast" min="-100" max="100" value="0">
+        </div>
+        <div class="slider-group">
+          <label>Doygunluk: <span id="satVal">0</span></label>
+          <input type="range" id="saturation" min="-100" max="100" value="0">
+        </div>
+
+        <h3>🖼️ Filtreler</h3>
+        <div class="filter-grid">
+          <button class="filter-btn active" data-filter="none">Normal</button>
+          <button class="filter-btn" data-filter="grayscale">Siyah-Beyaz</button>
+          <button class="filter-btn" data-filter="sepia">Sepya</button>
+          <button class="filter-btn" data-filter="vintage">Vintage</button>
+          <button class="filter-btn" data-filter="vhs">VHS</button>
+          <button class="filter-btn" data-filter="polaroid">Polaroid</button>
+          <button class="filter-btn" data-filter="lomo">Lomo</button>
+          <button class="filter-btn" data-filter="kodak">Kodak</button>
+          <button class="filter-btn" data-filter="fuji">Fuji</button>
+          <button class="filter-btn" data-filter="bw-high">B&W High Contrast</button>
+        </div>
+
+        <h3>✂️ Kırpma</h3>
+        <button id="startCrop">Kırpma Modu</button>
+        <button id="applyCrop">Kırp ✓</button>
+        <button id="cancelCrop">İptal ✕</button>
+
+        <h3>🖋️ Metin Ekle</h3>
+        <input type="text" class="text-input" id="textInput" placeholder="Metin gir...">
+        <input type="color" class="color-picker" id="textColor" value="#ffffff">
+        <input type="range" id="textSize" min="12" max="80" value="30" placeholder="Boyut">
+        <button id="addText">Metin Ekle</button>
+
+        <h3>🔄 Döndür / Yansıt</h3>
+        <button id="rotateLeft">⟲ 90°</button>
+        <button id="rotateRight">⟳ 90°</button>
+        <button id="flipH">↔ Yatay</button>
+        <button id="flipV">↕ Dikey</button>
+
+        <h3>💾 Dışa Aktar</h3>
+        <button id="downloadPng">💾 PNG Olarak İndir</button>
+        <button id="downloadJpg">💾 JPG Olarak İndir</button>
+        <button id="reset">🔄 Sıfırla</button>
+      </div>
     </div>
 
-    <img id="preview" />
-    <div class="polaroid-date" id="dateStamp">25 NİSAN 2025</div>
-
-    <div class="filters">
-      <button class="filter-btn" data-effect="">Normal</button>
-      <button class="filter-btn" data-effect="effect-1998">1998 Dijital</button>
-      <button class="filter-btn" data-effect="effect-polaroid">Polaroid</button>
-      <button class="filter-btn" data-effect="effect-vhs">VHS</button>
-      <button class="filter-btn" data-effect="effect-lomo">Lomo</button>
-      <button class="filter-btn" data-effect="effect-kodak">Kodak Gold</button>
-      <button class="filter-btn" data-effect="effect-fuji">Fuji Pro</button>
-    </div>
-
-    <div class="controls">
-      <button id="downloadBtn">💾 Efekti İndir</button>
-      <button id="resetBtn">🔄 Sıfırla</button>
+    <div class="preview-area">
+      <div class="upload-area" id="uploadArea">
+        <p>📷 Fotoğrafını sürükle veya tıkla</p>
+        <input type="file" id="fileInput" accept="image/*" style="display:none" />
+      </div>
+      <div id="previewContainer" style="position: relative; width: 100%; height: auto;">
+        <img id="preview" />
+        <div id="cropArea" class="crop-area"></div>
+        <div id="textElement"></div>
+      </div>
     </div>
   </div>
 
   <script>
+    // DOM Elements
     const uploadArea = document.getElementById('uploadArea');
     const fileInput = document.getElementById('fileInput');
     const preview = document.getElementById('preview');
-    const dateStamp = document.getElementById('dateStamp');
-    const downloadBtn = document.getElementById('downloadBtn');
-    const resetBtn = document.getElementById('resetBtn');
+    const previewContainer = document.getElementById('previewContainer');
+    const cropArea = document.getElementById('cropArea');
+    const textElement = document.getElementById('textElement');
+    const brightnessSlider = document.getElementById('brightness');
+    const contrastSlider = document.getElementById('contrast');
+    const saturationSlider = document.getElementById('saturation');
+    const brightVal = document.getElementById('brightVal');
+    const contrastVal = document.getElementById('contrastVal');
+    const satVal = document.getElementById('satVal');
     const filterBtns = document.querySelectorAll('.filter-btn');
+    const startCropBtn = document.getElementById('startCrop');
+    const applyCropBtn = document.getElementById('applyCrop');
+    const cancelCropBtn = document.getElementById('cancelCrop');
+    const textInput = document.getElementById('textInput');
+    const textColor = document.getElementById('textColor');
+    const textSize = document.getElementById('textSize');
+    const addTextBtn = document.getElementById('addText');
+    const rotateLeftBtn = document.getElementById('rotateLeft');
+    const rotateRightBtn = document.getElementById('rotateRight');
+    const flipHBtn = document.getElementById('flipH');
+    const flipVBtn = document.getElementById('flipV');
+    const downloadPngBtn = document.getElementById('downloadPng');
+    const downloadJpgBtn = document.getElementById('downloadJpg');
+    const resetBtn = document.getElementById('reset');
 
-    let currentEffect = '';
+    // State
+    let currentFilter = 'none';
+    let isCropping = false;
+    let isDraggingText = false;
+    let textOffsetX = 0, textOffsetY = 0;
+    let rotation = 0;
+    let flipH = false, flipV = false;
 
     // Upload
     uploadArea.addEventListener('click', () => fileInput.click());
-
-    uploadArea.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      uploadArea.classList.add('dragover');
-    });
-
-    uploadArea.addEventListener('dragleave', () => {
-      uploadArea.classList.remove('dragover');
-    });
-
+    uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.style.borderColor = '#50fa7b'; });
+    uploadArea.addEventListener('dragleave', () => { uploadArea.style.borderColor = '#555'; });
     uploadArea.addEventListener('drop', (e) => {
       e.preventDefault();
-      uploadArea.classList.remove('dragover');
+      uploadArea.style.borderColor = '#555';
       if (e.dataTransfer.files.length) {
         fileInput.files = e.dataTransfer.files;
         handleFile();
@@ -248,102 +303,281 @@
       reader.onload = (e) => {
         preview.src = e.target.result;
         preview.style.display = 'block';
-        dateStamp.style.display = 'none';
-        removeEffects();
+        resetTransforms();
       };
       reader.readAsDataURL(file);
     }
 
-    // Filters
+    // Filters & Adjustments
+    function applyFilters() {
+      let filter = '';
+
+      // Adjustments
+      const bright = brightnessSlider.value;
+      const contrast = contrastSlider.value;
+      const saturate = saturationSlider.value;
+      brightVal.textContent = bright;
+      contrastVal.textContent = contrast;
+      satVal.textContent = saturate;
+
+      if (bright != 0) filter += `brightness(${1 + bright/100}) `;
+      if (contrast != 0) filter += `contrast(${1 + contrast/100}) `;
+      if (saturate != 0) filter += `saturate(${1 + saturate/100}) `;
+
+      // Filter presets
+      switch(currentFilter) {
+        case 'grayscale': filter += 'grayscale(1)'; break;
+        case 'sepia': filter += 'sepia(1)'; break;
+        case 'vintage': filter += 'sepia(0.3) contrast(1.1) saturate(1.2)'; break;
+        case 'vhs': filter += 'saturate(0.7) contrast(1.1)'; break;
+        case 'polaroid': filter += ''; break; // handled in download
+        case 'lomo': filter += 'contrast(1.3) saturate(1.5) sepia(0.2)'; break;
+        case 'kodak': filter += 'brightness(1.1) contrast(1.05) saturate(1.2)'; break;
+        case 'fuji': filter += 'saturate(1.3) contrast(1.1) hue-rotate(5deg)'; break;
+        case 'bw-high': filter += 'grayscale(1) contrast(1.5)'; break;
+      }
+
+      preview.style.filter = filter;
+    }
+
+    brightnessSlider.addEventListener('input', applyFilters);
+    contrastSlider.addEventListener('input', applyFilters);
+    saturationSlider.addEventListener('input', applyFilters);
+
     filterBtns.forEach(btn => {
       btn.addEventListener('click', () => {
         filterBtns.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        currentEffect = btn.dataset.effect;
-        applyEffect();
+        currentFilter = btn.dataset.filter;
+        applyFilters();
       });
     });
 
-    function applyEffect() {
-      removeEffects();
-      if (currentEffect) {
-        preview.classList.add(currentEffect);
-        if (currentEffect === 'effect-polaroid') {
-          dateStamp.style.display = 'block';
-          const today = new Date();
-          const formatted = today.toLocaleDateString('tr-TR').toUpperCase();
-          dateStamp.textContent = formatted;
-        } else {
-          dateStamp.style.display = 'none';
-        }
-      }
+    // Text
+    addTextBtn.addEventListener('click', () => {
+      const text = textInput.value.trim();
+      if (!text || !preview.src) return;
+
+      textElement.textContent = text;
+      textElement.style.color = textColor.value;
+      textElement.style.fontSize = `${textSize.value}px`;
+      textElement.style.display = 'block';
+      textElement.style.left = '50%';
+      textElement.style.top = '50%';
+      textElement.style.transform = 'translate(-50%, -50%)';
+
+      // Make draggable
+      textElement.addEventListener('mousedown', (e) => {
+        isDraggingText = true;
+        textOffsetX = e.clientX - textElement.getBoundingClientRect().left;
+        textOffsetY = e.clientY - textElement.getBoundingClientRect().top;
+      });
+
+      document.addEventListener('mousemove', (e) => {
+        if (!isDraggingText) return;
+        const containerRect = previewContainer.getBoundingClientRect();
+        let left = e.clientX - containerRect.left - textOffsetX;
+        let top = e.clientY - containerRect.top - textOffsetY;
+        textElement.style.left = `${left}px`;
+        textElement.style.top = `${top}px`;
+        textElement.style.transform = 'none';
+      });
+
+      document.addEventListener('mouseup', () => {
+        isDraggingText = false;
+      });
+    });
+
+    // Rotate & Flip
+    rotateLeftBtn.addEventListener('click', () => {
+      rotation = (rotation - 90) % 360;
+      applyTransform();
+    });
+
+    rotateRightBtn.addEventListener('click', () => {
+      rotation = (rotation + 90) % 360;
+      applyTransform();
+    });
+
+    flipHBtn.addEventListener('click', () => {
+      flipH = !flipH;
+      applyTransform();
+    });
+
+    flipVBtn.addEventListener('click', () => {
+      flipV = !flipV;
+      applyTransform();
+    });
+
+    function applyTransform() {
+      let transform = `rotate(${rotation}deg)`;
+      if (flipH) transform += ' scaleX(-1)';
+      if (flipV) transform += ' scaleY(-1)';
+      preview.style.transform = transform;
     }
 
-    function removeEffects() {
-      preview.className = '';
-    }
-
-    // Download
-    downloadBtn.addEventListener('click', () => {
+    // Crop
+    startCropBtn.addEventListener('click', () => {
       if (!preview.src) return;
+      isCropping = true;
+      cropArea.style.display = 'block';
+      cropArea.style.width = '200px';
+      cropArea.style.height = '200px';
+      cropArea.style.left = '50px';
+      cropArea.style.top = '50px';
 
-      // Canvas oluştur
+      // Make crop area draggable
+      let isDraggingCrop = false, cropOffsetX = 0, cropOffsetY = 0;
+
+      cropArea.addEventListener('mousedown', (e) => {
+        isDraggingCrop = true;
+        cropOffsetX = e.clientX - cropArea.getBoundingClientRect().left;
+        cropOffsetY = e.clientY - cropArea.getBoundingClientRect().top;
+      });
+
+      document.addEventListener('mousemove', (e) => {
+        if (!isDraggingCrop || !isCropping) return;
+        const containerRect = previewContainer.getBoundingClientRect();
+        let left = e.clientX - containerRect.left - cropOffsetX;
+        let top = e.clientY - containerRect.top - cropOffsetY;
+        cropArea.style.left = `${Math.max(0, Math.min(preview.offsetWidth - cropArea.offsetWidth, left))}px`;
+        cropArea.style.top = `${Math.max(0, Math.min(preview.offsetHeight - cropArea.offsetHeight, top))}px`;
+      });
+
+      document.addEventListener('mouseup', () => {
+        isDraggingCrop = false;
+      });
+    });
+
+    applyCropBtn.addEventListener('click', () => {
+      if (!isCropping) return;
+      cropImage();
+      cropArea.style.display = 'none';
+      isCropping = false;
+    });
+
+    cancelCropBtn.addEventListener('click', () => {
+      cropArea.style.display = 'none';
+      isCropping = false;
+    });
+
+    function cropImage() {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
 
-      // Ölçeklendir
-      const img = new Image();
-      img.src = preview.src;
-      img.onload = () => {
-        // Efektlere göre canvas boyutu ayarla
-        if (currentEffect === 'effect-polaroid') {
-          canvas.width = img.width + 40;
-          canvas.height = img.height + 60;
-          ctx.fillStyle = 'white';
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-          ctx.drawImage(img, 20, 20);
-          // Tarih damgası
-          ctx.fillStyle = 'rgba(0,0,0,0.5)';
-          ctx.fillRect(canvas.width - 120, canvas.height - 30, 110, 25);
-          ctx.fillStyle = 'white';
-          ctx.font = '12px Arial';
-          ctx.fillText(new Date().toLocaleDateString('tr-TR').toUpperCase(), canvas.width - 115, canvas.height - 12);
-        } else {
-          canvas.width = img.width;
-          canvas.height = img.height;
-          ctx.drawImage(img, 0, 0);
+      const cropX = parseInt(cropArea.style.left);
+      const cropY = parseInt(cropArea.style.top);
+      const cropW = parseInt(cropArea.style.width);
+      const cropH = parseInt(cropArea.style.height);
 
-          // VHS efekti için gürültü ekle
-          if (currentEffect === 'effect-vhs') {
-            for (let i = 0; i < canvas.width * canvas.height / 10; i++) {
-              const x = Math.random() * canvas.width;
-              const y = Math.random() * canvas.height;
-              const color = Math.random() > 0.5 ? 255 : 0;
-              ctx.fillStyle = `rgba(${color},${color},${color},0.1)`;
-              ctx.fillRect(x, y, 1, 1);
+      canvas.width = cropW;
+      canvas.height = cropH;
+
+      ctx.drawImage(preview, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+
+      preview.src = canvas.toDataURL('image/png');
+    }
+
+    // Download
+    downloadPngBtn.addEventListener('click', () => downloadImage('png'));
+    downloadJpgBtn.addEventListener('click', () => downloadImage('jpeg'));
+
+    function downloadImage(format) {
+      if (!preview.src) return;
+
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      // Apply current styles
+      const tempImg = new Image();
+      tempImg.src = preview.src;
+      tempImg.onload = () => {
+        canvas.width = tempImg.width;
+        canvas.height = tempImg.height;
+
+        // Apply CSS transforms to canvas
+        ctx.save();
+        ctx.translate(canvas.width/2, canvas.height/2);
+        ctx.rotate(rotation * Math.PI / 180);
+        if (flipH) ctx.scale(-1, 1);
+        if (flipV) ctx.scale(1, -1);
+        ctx.drawImage(tempImg, -tempImg.width/2, -tempImg.height/2);
+        ctx.restore();
+
+        // Apply filters via pixel manipulation if needed (for VHS noise, etc.)
+        if (currentFilter === 'vhs') {
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          for (let i = 0; i < imageData.data.length; i += 4) {
+            if (Math.random() > 0.99) {
+              imageData.data[i] = 255; // R
+              imageData.data[i+1] = 255; // G
+              imageData.data[i+2] = 255; // B
             }
           }
+          ctx.putImageData(imageData, 0, 0);
         }
 
-        // İndir
+        // Add text
+        if (textElement.style.display !== 'none' && textElement.textContent) {
+          ctx.font = `${textSize.value}px Arial`;
+          ctx.fillStyle = textColor.value;
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'top';
+          const textX = parseFloat(textElement.style.left) || 50;
+          const textY = parseFloat(textElement.style.top) || 50;
+          ctx.fillText(textElement.textContent, textX, textY);
+        }
+
+        // For Polaroid: add white border
+        if (currentFilter === 'polaroid') {
+          const borderSize = 30;
+          const finalCanvas = document.createElement('canvas');
+          const finalCtx = finalCanvas.getContext('2d');
+          finalCanvas.width = canvas.width + borderSize*2;
+          finalCanvas.height = canvas.height + borderSize*2 + 40; // extra for date
+
+          finalCtx.fillStyle = 'white';
+          finalCtx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+          finalCtx.drawImage(canvas, borderSize, borderSize);
+
+          // Add date
+          finalCtx.fillStyle = '#333';
+          finalCtx.font = '14px Arial';
+          finalCtx.fillText(new Date().toLocaleDateString('tr-TR'), borderSize + 10, finalCanvas.height - 15);
+
+          canvas.width = finalCanvas.width;
+          canvas.height = finalCanvas.height;
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(finalCanvas, 0, 0);
+        }
+
+        // Download
         const link = document.createElement('a');
-        link.download = `filtered-photo-${currentEffect || 'normal'}.png`;
-        link.href = canvas.toDataURL('image/png');
+        link.download = `edited-photo.${format}`;
+        link.href = canvas.toDataURL(`image/${format}`, 0.9);
         link.click();
       };
-    });
+    }
 
     // Reset
-    resetBtn.addEventListener('click', () => {
-      preview.src = '';
-      preview.style.display = 'none';
-      dateStamp.style.display = 'none';
-      fileInput.value = '';
-      removeEffects();
+    resetBtn.addEventListener('click', resetTransforms);
+
+    function resetTransforms() {
+      brightnessSlider.value = 0;
+      contrastSlider.value = 0;
+      saturationSlider.value = 0;
+      currentFilter = 'none';
+      rotation = 0;
+      flipH = false;
+      flipV = false;
+      textElement.style.display = 'none';
+      cropArea.style.display = 'none';
+      isCropping = false;
       filterBtns.forEach(b => b.classList.remove('active'));
       filterBtns[0].classList.add('active');
-      currentEffect = '';
-    });
+      applyFilters();
+      applyTransform();
+    }
   </script>
 </body>
 </html>
