@@ -1,312 +1,349 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>2.5D Mini Minecraft</title>
+  <title>📸 Fotoğraf Film Simülatörü</title>
   <style>
-    body {
+    * {
       margin: 0;
-      overflow: hidden;
-      background: #87CEEB;
-      font-family: Arial, sans-serif;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
-    #game {
-      position: relative;
-      width: 100vw;
-      height: 100vh;
-      background: linear-gradient(to bottom, #87CEEB 0%, #E0F6FF 70%, #D2B48C 100%);
-    }
-
-    .block {
-      position: absolute;
-      width: 50px;
-      height: 50px;
-      background-size: cover;
-      box-shadow: inset -5px -5px 10px rgba(0,0,0,0.3);
-      transition: transform 0.1s;
-      cursor: pointer;
-    }
-
-    .player {
-      position: absolute;
-      width: 40px;
-      height: 80px;
-      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="80" viewBox="0 0 40 80"><rect x="10" y="0" width="20" height="20" fill="%23FF0000"/><rect x="5" y="20" width="30" height="30" fill="%23333"/><rect x="10" y="50" width="20" height="30" fill="%23000"/></svg>') no-repeat center;
-      z-index: 100;
-      transition: all 0.2s ease;
-    }
-
-    #ui {
-      position: fixed;
-      top: 20px;
-      left: 20px;
-      background: rgba(0,0,0,0.7);
+    body {
+      background: #1e1e2e;
       color: white;
-      padding: 15px;
-      border-radius: 10px;
-      font-size: 14px;
-      z-index: 200;
-    }
-
-    #inventory {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
+      min-height: 100vh;
+      padding: 20px;
       display: flex;
-      gap: 10px;
-      background: rgba(0,0,0,0.7);
-      padding: 10px;
-      border-radius: 10px;
-      z-index: 200;
+      flex-direction: column;
+      align-items: center;
     }
 
-    .inv-item {
-      width: 40px;
-      height: 40px;
-      background-size: cover;
-      border: 3px solid transparent;
+    .container {
+      width: 100%;
+      max-width: 800px;
+      background: rgba(30,30,46,0.8);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 20px;
+      background: linear-gradient(90deg, #ff9a9e, #fecfef);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .upload-area {
+      border: 3px dashed #555;
+      padding: 40px 20px;
+      border-radius: 15px;
+      margin: 20px 0;
       cursor: pointer;
+      transition: all 0.3s;
     }
 
-    .inv-item.selected {
-      border-color: gold;
-      box-shadow: 0 0 10px gold;
+    .upload-area:hover {
+      border-color: #ff6b6b;
+      background: rgba(255,107,107,0.1);
     }
 
-    #instructions {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: rgba(0,0,0,0.7);
-      color: white;
-      padding: 15px;
+    .upload-area.dragover {
+      border-color: #50fa7b;
+      background: rgba(80,250,123,0.1);
+    }
+
+    #preview {
+      max-width: 100%;
+      max-height: 400px;
+      margin: 20px auto;
+      display: none;
       border-radius: 10px;
-      font-size: 12px;
-      max-width: 200px;
-      z-index: 200;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      position: relative;
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin: 20px 0;
+    }
+
+    .filter-btn {
+      background: #333;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .filter-btn:hover, .filter-btn.active {
+      background: #ff6b6b;
+      transform: translateY(-2px);
+    }
+
+    .controls {
+      margin: 20px 0;
+    }
+
+    button {
+      background: #ff6b6b;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      margin: 10px;
+      border-radius: 50px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 10px rgba(255,107,107,0.4);
+    }
+
+    button:hover {
+      background: #ff5252;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(255,107,107,0.6);
+    }
+
+    .polaroid-date {
+      position: absolute;
+      bottom: 10px;
+      right: 15px;
+      background: rgba(0,0,0,0.5);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 0.8rem;
+      display: none;
+    }
+
+    /* Efektler */
+    .effect-1998 {
+      filter: contrast(1.2) saturate(0.8) brightness(0.9);
+      image-rendering: pixelated;
+      transform: scale(0.98);
+      animation: shake 5s infinite;
+    }
+
+    .effect-polaroid {
+      border: 20px solid white;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+      transform: rotate(-3deg);
+      position: relative;
+    }
+
+    .effect-vhs {
+      filter: saturate(0.7) contrast(1.1);
+      animation: vhs 2s infinite;
+    }
+
+    .effect-lomo {
+      filter: contrast(1.3) saturate(1.5) sepia(0.2);
+    }
+
+    .effect-kodak {
+      filter: brightness(1.1) contrast(1.05) saturate(1.2);
+      box-shadow: 0 0 30px rgba(255,215,0,0.3);
+    }
+
+    .effect-fuji {
+      filter: saturate(1.3) contrast(1.1) hue-rotate(5deg);
+    }
+
+    /* Animations */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0) scale(0.98); }
+      25% { transform: translateX(-2px) scale(0.98); }
+      75% { transform: translateX(2px) scale(0.98); }
+    }
+
+    @keyframes vhs {
+      0%, 100% { transform: translateX(0); filter: saturate(0.7) contrast(1.1); }
+      50% { transform: translateX(1px); filter: saturate(0.7) contrast(1.1) brightness(1.05); }
+    }
+
+    @media (max-width: 600px) {
+      .container { padding: 20px; }
+      h1 { font-size: 1.8rem; }
     }
   </style>
 </head>
 <body>
-  <div id="game">
-    <div class="player" id="player"></div>
-  </div>
+  <div class="container">
+    <h1>📸 Fotoğraf Film Simülatörü</h1>
+    <div class="upload-area" id="uploadArea">
+      <p>📷 Fotoğrafını sürükle veya tıkla</p>
+      <input type="file" id="fileInput" accept="image/*" style="display:none" />
+    </div>
 
-  <div id="ui">
-    <div>📍 X: <span id="posX">0</span> Y: <span id="posY">0</span></div>
-    <div>🧱 Seçili Blok: <span id="selectedBlock">Toprak</span></div>
-    <button id="saveBtn">💾 Kaydet</button>
-    <button id="loadBtn">📂 Yükle</button>
-  </div>
+    <img id="preview" />
+    <div class="polaroid-date" id="dateStamp">25 NİSAN 2025</div>
 
-  <div id="inventory">
-    <!-- JS ile doldurulacak -->
-  </div>
+    <div class="filters">
+      <button class="filter-btn" data-effect="">Normal</button>
+      <button class="filter-btn" data-effect="effect-1998">1998 Dijital</button>
+      <button class="filter-btn" data-effect="effect-polaroid">Polaroid</button>
+      <button class="filter-btn" data-effect="effect-vhs">VHS</button>
+      <button class="filter-btn" data-effect="effect-lomo">Lomo</button>
+      <button class="filter-btn" data-effect="effect-kodak">Kodak Gold</button>
+      <button class="filter-btn" data-effect="effect-fuji">Fuji Pro</button>
+    </div>
 
-  <div id="instructions">
-    <strong>🎮 KONTROLLER:</strong><br>
-    - WASD: Hareket<br>
-    - FARE: Blok seç<br>
-    - SOL TIK: Blok yerleştir<br>
-    - SAĞ TIK: Blok kır<br>
-    - 1-4: Envanter değiştir
+    <div class="controls">
+      <button id="downloadBtn">💾 Efekti İndir</button>
+      <button id="resetBtn">🔄 Sıfırla</button>
+    </div>
   </div>
 
   <script>
-    // Basit 2.5D Mini Minecraft
-    const game = document.getElementById('game');
-    const player = document.getElementById('player');
-    const posX = document.getElementById('posX');
-    const posY = document.getElementById('posY');
-    const selectedBlockEl = document.getElementById('selectedBlock');
-    const inventoryEl = document.getElementById('inventory');
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const preview = document.getElementById('preview');
+    const dateStamp = document.getElementById('dateStamp');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const filterBtns = document.querySelectorAll('.filter-btn');
 
-    // Oyun durumu
-    let gameState = {
-      playerX: 400,
-      playerY: 300,
-      blocks: [],
-      inventory: [
-        { type: 'dirt', name: 'Toprak', color: '#8B4513' },
-        { type: 'grass', name: 'Çim', color: '#567D46' },
-        { type: 'stone', name: 'Taş', color: '#808080' },
-        { type: 'wood', name: 'Tahta', color: '#8B4513' }
-      ],
-      selectedSlot: 0
-    };
+    let currentEffect = '';
 
-    // Texture generator (data URL ile)
-    function generateTexture(color) {
-      return `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='50' height='50' viewBox='0 0 50 50'><rect width='50' height='50' fill='${color}'/><rect x='0' y='0' width='50' height='5' fill='rgba(0,0,0,0.2)'/><rect x='0' y='0' width='5' height='50' fill='rgba(0,0,0,0.2)'/></svg>`;
+    // Upload
+    uploadArea.addEventListener('click', () => fileInput.click());
+
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+      uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.classList.remove('dragover');
+      if (e.dataTransfer.files.length) {
+        fileInput.files = e.dataTransfer.files;
+        handleFile();
+      }
+    });
+
+    fileInput.addEventListener('change', handleFile);
+
+    function handleFile() {
+      const file = fileInput.files[0];
+      if (!file || !file.type.startsWith('image/')) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+        dateStamp.style.display = 'none';
+        removeEffects();
+      };
+      reader.readAsDataURL(file);
     }
 
-    // Render player
-    function renderPlayer() {
-      player.style.left = gameState.playerX + 'px';
-      player.style.top = gameState.playerY + 'px';
-      posX.textContent = Math.floor(gameState.playerX / 50);
-      posY.textContent = Math.floor(gameState.playerY / 50);
+    // Filters
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentEffect = btn.dataset.effect;
+        applyEffect();
+      });
+    });
+
+    function applyEffect() {
+      removeEffects();
+      if (currentEffect) {
+        preview.classList.add(currentEffect);
+        if (currentEffect === 'effect-polaroid') {
+          dateStamp.style.display = 'block';
+          const today = new Date();
+          const formatted = today.toLocaleDateString('tr-TR').toUpperCase();
+          dateStamp.textContent = formatted;
+        } else {
+          dateStamp.style.display = 'none';
+        }
+      }
     }
 
-    // Render blocks
-    function renderBlocks() {
-      // Mevcut blokları temizle (performans için optimize edilebilir)
-      document.querySelectorAll('.block').forEach(b => b.remove());
+    function removeEffects() {
+      preview.className = '';
+    }
 
-      gameState.blocks.forEach(block => {
-        const el = document.createElement('div');
-        el.className = 'block';
-        el.style.left = block.x + 'px';
-        el.style.top = block.y + 'px';
-        el.style.backgroundImage = `url(${generateTexture(block.color)})`;
-        el.dataset.id = block.id;
+    // Download
+    downloadBtn.addEventListener('click', () => {
+      if (!preview.src) return;
 
-        // Blok etkileşimi
-        el.addEventListener('click', (e) => {
-          e.stopPropagation();
-          if (e.button === 0) {
-            // Sol tık: Yerleştir (yeni blok)
-            placeBlock(block.x, block.y - 50);
-          } else if (e.button === 2) {
-            // Sağ tık: Kır
-            removeBlock(block.id);
+      // Canvas oluştur
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      // Ölçeklendir
+      const img = new Image();
+      img.src = preview.src;
+      img.onload = () => {
+        // Efektlere göre canvas boyutu ayarla
+        if (currentEffect === 'effect-polaroid') {
+          canvas.width = img.width + 40;
+          canvas.height = img.height + 60;
+          ctx.fillStyle = 'white';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 20, 20);
+          // Tarih damgası
+          ctx.fillStyle = 'rgba(0,0,0,0.5)';
+          ctx.fillRect(canvas.width - 120, canvas.height - 30, 110, 25);
+          ctx.fillStyle = 'white';
+          ctx.font = '12px Arial';
+          ctx.fillText(new Date().toLocaleDateString('tr-TR').toUpperCase(), canvas.width - 115, canvas.height - 12);
+        } else {
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+
+          // VHS efekti için gürültü ekle
+          if (currentEffect === 'effect-vhs') {
+            for (let i = 0; i < canvas.width * canvas.height / 10; i++) {
+              const x = Math.random() * canvas.width;
+              const y = Math.random() * canvas.height;
+              const color = Math.random() > 0.5 ? 255 : 0;
+              ctx.fillStyle = `rgba(${color},${color},${color},0.1)`;
+              ctx.fillRect(x, y, 1, 1);
+            }
           }
-        });
-
-        el.addEventListener('contextmenu', (e) => e.preventDefault());
-
-        game.appendChild(el);
-      });
-    }
-
-    // Blok ekle
-    function placeBlock(x, y) {
-      const selected = gameState.inventory[gameState.selectedSlot];
-      const id = Date.now() + Math.random();
-      gameState.blocks.push({
-        id,
-        x,
-        y,
-        type: selected.type,
-        color: selected.color
-      });
-      renderBlocks();
-    }
-
-    // Blok kaldır
-    function removeBlock(id) {
-      gameState.blocks = gameState.blocks.filter(b => b.id !== id);
-      renderBlocks();
-    }
-
-    // Envanteri render et
-    function renderInventory() {
-      inventoryEl.innerHTML = '';
-      gameState.inventory.forEach((item, index) => {
-        const el = document.createElement('div');
-        el.className = `inv-item ${index === gameState.selectedSlot ? 'selected' : ''}`;
-        el.style.backgroundImage = `url(${generateTexture(item.color)})`;
-        el.dataset.slot = index;
-        el.addEventListener('click', () => {
-          gameState.selectedSlot = index;
-          selectedBlockEl.textContent = item.name;
-          renderInventory();
-        });
-        inventoryEl.appendChild(el);
-      });
-    }
-
-    // Hareket
-    document.addEventListener('keydown', (e) => {
-      const speed = 10;
-      switch(e.key.toLowerCase()) {
-        case 'w': gameState.playerY = Math.max(0, gameState.playerY - speed); break;
-        case 's': gameState.playerY += speed; break;
-        case 'a': gameState.playerX = Math.max(0, gameState.playerX - speed); break;
-        case 'd': gameState.playerX += speed; break;
-        case '1': gameState.selectedSlot = 0; selectedBlockEl.textContent = gameState.inventory[0].name; renderInventory(); break;
-        case '2': gameState.selectedSlot = 1; selectedBlockEl.textContent = gameState.inventory[1].name; renderInventory(); break;
-        case '3': gameState.selectedSlot = 2; selectedBlockEl.textContent = gameState.inventory[2].name; renderInventory(); break;
-        case '4': gameState.selectedSlot = 3; selectedBlockEl.textContent = gameState.inventory[3].name; renderInventory(); break;
-      }
-      renderPlayer();
-    });
-
-    // Fare ile blok ekleme (oyuncunun önünde)
-    game.addEventListener('click', (e) => {
-      if (e.target === game) {
-        const rect = game.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-
-        // Oyuncuya en yakın 50px grid noktasına yerleştir
-        const gridX = Math.round((x - gameState.playerX) / 50) * 50 + gameState.playerX;
-        const gridY = Math.round((y - gameState.playerY) / 50) * 50 + gameState.playerY;
-
-        if (Math.abs(gridX - gameState.playerX) <= 100 && Math.abs(gridY - gameState.playerY) <= 100) {
-          placeBlock(gridX, gridY);
         }
-      }
+
+        // İndir
+        const link = document.createElement('a');
+        link.download = `filtered-photo-${currentEffect || 'normal'}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      };
     });
 
-    // Sağ tık engelle
-    game.addEventListener('contextmenu', (e) => {
-      if (e.target === game) {
-        e.preventDefault();
-        const rect = game.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-
-        // En yakın bloğu bul ve kaldır
-        const closest = gameState.blocks.reduce((prev, curr) => {
-          const prevDist = Math.hypot(prev.x - x, prev.y - y);
-          const currDist = Math.hypot(curr.x - x, curr.y - y);
-          return currDist < prevDist ? curr : prev;
-        }, gameState.blocks[0] || null);
-
-        if (closest && Math.hypot(closest.x - x, closest.y - y) < 60) {
-          removeBlock(closest.id);
-        }
-      }
+    // Reset
+    resetBtn.addEventListener('click', () => {
+      preview.src = '';
+      preview.style.display = 'none';
+      dateStamp.style.display = 'none';
+      fileInput.value = '';
+      removeEffects();
+      filterBtns.forEach(b => b.classList.remove('active'));
+      filterBtns[0].classList.add('active');
+      currentEffect = '';
     });
-
-    // Kaydet / Yükle
-    document.getElementById('saveBtn').addEventListener('click', () => {
-      localStorage.setItem('miniMinecraft', JSON.stringify(gameState));
-      alert('🌍 Dünya kaydedildi!');
-    });
-
-    document.getElementById('loadBtn').addEventListener('click', () => {
-      const saved = localStorage.getItem('miniMinecraft');
-      if (saved) {
-        gameState = JSON.parse(saved);
-        renderPlayer();
-        renderBlocks();
-        renderInventory();
-        alert('🌎 Dünya yüklendi!');
-      } else {
-        alert('Kayıtlı dünya bulunamadı.');
-      }
-    });
-
-    // Başlangıç blokları
-    for (let i = -5; i <= 5; i++) {
-      gameState.blocks.push({
-        id: `ground-${i}`,
-        x: 400 + i * 50,
-        y: 400,
-        type: 'grass',
-        color: '#567D46'
-      });
-    }
-
-    // Render initial state
-    renderPlayer();
-    renderBlocks();
-    renderInventory();
   </script>
 </body>
 </html>
