@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Hayatın RPG Oyunu 2.0 🎮</title>
+  <title>🌍 Ultimate Country Simulator</title>
   <style>
     * {
       margin: 0;
@@ -13,498 +13,617 @@
     }
 
     body {
-      background: linear-gradient(135deg, #4b6cb7, #182848);
-      color: white;
+      background: #1a1a2e;
+      color: #e6e6e6;
       min-height: 100vh;
       padding: 20px;
+    }
+
+    .game-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      gap: 20px;
+    }
+
+    .sidebar {
+      background: #16213e;
+      padding: 20px;
+      border-radius: 15px;
+      height: fit-content;
+    }
+
+    .main-panel {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 20px;
+    }
+
+    .header {
+      background: #0f3460;
+      padding: 20px;
+      border-radius: 15px;
       display: flex;
-      flex-direction: column;
+      justify-content: space-between;
       align-items: center;
     }
 
-    .container {
-      width: 100%;
-      max-width: 550px;
-      background: rgba(0,0,0,0.3);
-      backdrop-filter: blur(10px);
-      border-radius: 20px;
-      padding: 30px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+
+    .stat-box {
+      background: #16213e;
+      padding: 15px;
+      border-radius: 10px;
       text-align: center;
     }
 
-    h1 {
-      font-size: 2rem;
-      margin-bottom: 20px;
-      text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #e94560;
     }
 
-    .class-select {
-      margin: 20px 0;
+    .event-log {
+      background: #16213e;
+      padding: 20px;
+      border-radius: 15px;
+      height: 200px;
+      overflow-y: auto;
+      font-size: 0.95rem;
+      line-height: 1.5;
     }
 
-    .class-btn {
-      background: #555;
-      color: white;
-      border: none;
-      padding: 10px 15px;
-      margin: 5px;
-      border-radius: 8px;
+    .event-item {
+      padding: 8px 0;
+      border-bottom: 1px solid #2a2a4a;
+    }
+
+    .event-item.negative { color: #ff6b6b; }
+    .event-item.positive { color: #50fa7b; }
+    .event-item.neutral { color: #ffd700; }
+
+    .decisions {
+      background: #0f3460;
+      padding: 20px;
+      border-radius: 15px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+    }
+
+    .decision-card {
+      background: #16213e;
+      padding: 15px;
+      border-radius: 10px;
       cursor: pointer;
       transition: all 0.3s;
+      border: 2px solid transparent;
     }
 
-    .class-btn:hover {
-      background: #777;
+    .decision-card:hover {
+      transform: translateY(-5px);
+      border-color: #533483;
     }
 
-    .class-btn.selected {
-      background: #FF6B6B;
-      transform: scale(1.05);
+    .decision-card h4 {
+      margin-bottom: 10px;
+      color: #533483;
     }
 
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
+    .decision-cost {
+      font-size: 0.9rem;
+      color: #ff6b6b;
+    }
+
+    .tabs {
+      display: flex;
       gap: 10px;
-      margin: 20px 0;
-      font-weight: bold;
+      margin-bottom: 20px;
     }
 
-    .stat {
-      background: rgba(255,255,255,0.1);
-      padding: 10px;
-      border-radius: 10px;
-      font-size: 0.95rem;
+    .tab-btn {
+      background: #16213e;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      color: #e6e6e6;
     }
 
-    .level {
-      font-size: 1.5rem;
-      margin: 15px 0;
-      color: #FFD700;
+    .tab-btn.active {
+      background: #533483;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
     }
 
     button {
-      background: #FF6B6B;
+      background: #e94560;
       color: white;
       border: none;
-      padding: 15px 30px;
-      margin: 10px 5px;
-      border-radius: 50px;
-      font-size: 1rem;
+      padding: 12px 25px;
+      border-radius: 8px;
       cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 10px rgba(255,107,107,0.4);
+      font-weight: bold;
+      margin: 5px;
     }
 
     button:hover {
-      background: #FF5252;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 15px rgba(255,107,107,0.6);
+      background: #ff6b6b;
     }
 
-    button:disabled {
-      background: #555;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .quest-box {
-      background: rgba(0,0,0,0.2);
-      padding: 20px;
-      border-radius: 15px;
-      margin: 20px 0;
-      min-height: 80px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.1rem;
-      text-align: center;
-      position: relative;
-    }
-
-    .quest-box.negative {
-      background: rgba(200, 50, 50, 0.2);
-      border: 2px dashed #ff5555;
-    }
-
-    .inventory {
-      margin-top: 30px;
-      width: 100%;
-    }
-
-    .inventory h3 {
-      margin-bottom: 10px;
-      font-size: 1.3rem;
-    }
-
-    .item {
-      background: rgba(255,255,255,0.15);
-      padding: 10px;
-      margin: 5px 0;
-      border-radius: 8px;
-      font-size: 0.95rem;
-    }
-
-    .completed {
-      opacity: 0.6;
-      text-decoration: line-through;
-    }
-
-    .skills {
+    .chart-container {
+      height: 200px;
+      background: #16213e;
+      border-radius: 10px;
+      padding: 15px;
       margin-top: 20px;
-      text-align: left;
     }
 
-    .skill {
-      background: rgba(255,255,255,0.1);
-      padding: 8px;
-      margin: 5px 0;
-      border-radius: 5px;
-      font-size: 0.9rem;
-    }
-
-    .streak {
-      font-size: 1.2rem;
-      margin: 15px 0;
-      color: #FFD700;
-    }
-
-    footer {
-      margin-top: 30px;
-      font-size: 0.9rem;
-      opacity: 0.8;
-    }
-
-    @media (max-width: 600px) {
-      .stats {
+    @media (max-width: 768px) {
+      .game-container {
         grid-template-columns: 1fr;
       }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🎮 Hayatın RPG Oyunu 2.0</h1>
+  <div class="game-container">
+    <div class="sidebar">
+      <h2>Cumhurbaşkanı</h2>
+      <div class="stat-box">
+        <div>Gün</div>
+        <div class="stat-value" id="day">1</div>
+      </div>
+      <div class="stat-box">
+        <div>Para</div>
+        <div class="stat-value" id="money">$<span id="money-val">1000</span>M</div>
+      </div>
+      <div class="stat-box">
+        <div>Kamuoyu</div>
+        <div class="stat-value" id="approval">65%</div>
+      </div>
+      <div class="stat-box">
+        <div>İstikrar</div>
+        <div class="stat-value" id="stability">80%</div>
+      </div>
 
-    <div id="classSelection" class="class-select">
-      <p>🧍‍♂️ Karakter sınıfını seç:</p>
-      <button class="class-btn" data-class="warrior">🛡️ Savaşçı (Sağlık +30, Stres +10)</button>
-      <button class="class-btn" data-class="mage">🧠 Büyücü (Odak +30, Enerji -20)</button>
-      <button class="class-btn" data-class="rogue">🥷 Hırsız (XP x1.5, Para -50%)</button>
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="economy">Ekonomi</button>
+        <button class="tab-btn" data-tab="politics">Siyaset</button>
+        <button class="tab-btn" data-tab="foreign">Dış Politika</button>
+      </div>
+
+      <div id="economy-tab" class="tab-content active">
+        <h3>📉 Ekonomi</h3>
+        <p>Enflasyon: <span id="inflation">5%</span></p>
+        <p>İşsizlik: <span id="unemployment">8%</span></p>
+        <p>Büyüme: <span id="growth">2%</span></p>
+        <p>Borç: <span id="debt">$<span>500</span>M</span></p>
+      </div>
+
+      <div id="politics-tab" class="tab-content">
+        <h3>🏛️ Siyaset</h3>
+        <p>Meclis Desteği: <span id="parliament">55%</span></p>
+        <p>Basın Özgürlüğü: <span id="press">70%</span></p>
+        <p>Seçim Sayısı: <span id="elections">0</span></p>
+      </div>
+
+      <div id="foreign-tab" class="tab-content">
+        <h3>🌐 Dış Politika</h3>
+        <p>AB İlişkileri: <span id="eu">40%</span></p>
+        <p>ABD İlişkileri: <span id="usa">60%</span></p>
+        <p>Rusya İlişkileri: <span id="russia">50%</span></p>
+        <p>Göçmenler: <span id="refugees">100K</span></p>
+      </div>
+
+      <button id="nextDay">⏭️ Sonraki Gün</button>
+      <button id="saveGame">💾 Kaydet</button>
+      <button id="loadGame">📂 Yükle</button>
     </div>
 
-    <div id="gameArea" style="display:none;">
-      <div class="level">Seviye: <span id="level">1</span> | XP: <span id="xp">0</span>/<span id="nextLevel">100</span></div>
-      <div class="streak">🔥 Streak: <span id="streak">0</span> gün</div>
-
-      <div class="stats">
-        <div class="stat">🩷 Sağlık: <span id="health">100</span></div>
-        <div class="stat">⚡ Enerji: <span id="energy">100</span></div>
-        <div class="stat">🎯 Odak: <span id="focus">50</span></div>
-        <div class="stat">💸 Para: <span id="money">100</span></div>
-        <div class="stat">😰 Stres: <span id="stress">0</span></div>
-        <div class="stat">🧠 Motivasyon: <span id="motivation">50</span></div>
-      </div>
-
-      <div class="quest-box" id="questBox">
-        Görev almak için "Yeni Görev" butonuna bas!
-      </div>
-
-      <button id="newQuest">✨ Yeni Görev</button>
-      <button id="completeQuest" disabled>✅ Görevi Tamamla</button>
-      <button id="skipQuest" disabled>❌ Görevi Geç (Cezalı!)</button>
-
-      <div class="skills">
-        <h3>🌳 Beceri Ağacın</h3>
-        <div id="skillsList">
-          <!-- JS ile doldurulacak -->
+    <div class="main-panel">
+      <div class="header">
+        <h1>TÜRKİYE — ULTIMATE COUNTRY SIMULATOR</h1>
+        <div>
+          <button id="startElection">🗳️ Seçim Başlat</button>
+          <button id="emergency">🚨 Olağanüstü Hal</button>
         </div>
       </div>
 
-      <div class="inventory">
-        <h3>🎒 Eşyaların</h3>
-        <div id="inventoryList">
-          <!-- JS ile doldurulacak -->
-        </div>
+      <div class="event-log" id="eventLog">
+        <div class="event-item neutral">Cumhurbaşkanı olarak göreve başladınız. Ülke 100 milyon nüfuslu, orta gelirli bir ülkede.</div>
+        <div class="event-item positive">Merkez Bankası, enflasyonu kontrol altına aldı.</div>
+        <div class="event-item negative">Tarım sektöründe kuraklık başladı.</div>
+      </div>
+
+      <div class="decisions" id="decisions">
+        <!-- JS ile doldurulacak -->
       </div>
     </div>
   </div>
 
-  <footer>
-    Her gün saat 00:00'da yeni macera! Başarısızlık da hayatın一部分 😅
-  </footer>
-
   <script>
     // Game State
     let gameState = {
-      level: 1,
-      xp: 0,
-      health: 100,
-      energy: 100,
-      focus: 50,
-      money: 100,
-      stress: 0,
-      motivation: 50,
-      inventory: [],
-      skills: [],
-      currentQuest: null,
-      nextLevel: 100,
-      streak: 0,
-      lastPlayed: null,
-      characterClass: null
+      day: 1,
+      money: 1000, // Milyon $
+      approval: 65,
+      stability: 80,
+      inflation: 5,
+      unemployment: 8,
+      growth: 2,
+      debt: 500,
+      parliament: 55,
+      press: 70,
+      elections: 0,
+      eu: 40,
+      usa: 60,
+      russia: 50,
+      refugees: 100,
+      policies: [],
+      events: [],
+      crisisLevel: 0,
+      coupRisk: 0,
+      lastElectionDay: 0,
+      ministers: {
+        economy: "Ahmet Yılmaz",
+        foreign: "Ayşe Kaya",
+        interior: "Mehmet Demir"
+      }
     };
 
     // DOM Elements
-    const classSelection = document.getElementById('classSelection');
-    const gameArea = document.getElementById('gameArea');
-    const levelEl = document.getElementById('level');
-    const xpEl = document.getElementById('xp');
-    const nextLevelEl = document.getElementById('nextLevel');
-    const healthEl = document.getElementById('health');
-    const energyEl = document.getElementById('energy');
-    const focusEl = document.getElementById('focus');
-    const moneyEl = document.getElementById('money');
-    const stressEl = document.getElementById('stress');
-    const motivationEl = document.getElementById('motivation');
-    const streakEl = document.getElementById('streak');
-    const questBox = document.getElementById('questBox');
-    const newQuestBtn = document.getElementById('newQuest');
-    const completeQuestBtn = document.getElementById('completeQuest');
-    const skipQuestBtn = document.getElementById('skipQuest');
-    const skillsList = document.getElementById('skillsList');
-    const inventoryList = document.getElementById('inventoryList');
+    const dayEl = document.getElementById('day');
+    const moneyEl = document.getElementById('money-val');
+    const approvalEl = document.getElementById('approval');
+    const stabilityEl = document.getElementById('stability');
+    const inflationEl = document.getElementById('inflation');
+    const unemploymentEl = document.getElementById('unemployment');
+    const growthEl = document.getElementById('growth');
+    const debtEl = document.getElementById('debt').querySelector('span');
+    const parliamentEl = document.getElementById('parliament');
+    const pressEl = document.getElementById('press');
+    const electionsEl = document.getElementById('elections');
+    const euEl = document.getElementById('eu');
+    const usaEl = document.getElementById('usa');
+    const russiaEl = document.getElementById('russia');
+    const refugeesEl = document.getElementById('refugees');
+    const eventLog = document.getElementById('eventLog');
+    const decisionsContainer = document.getElementById('decisions');
+    const nextDayBtn = document.getElementById('nextDay');
+    const saveGameBtn = document.getElementById('saveGame');
+    const loadGameBtn = document.getElementById('loadGame');
+    const startElectionBtn = document.getElementById('startElection');
+    const emergencyBtn = document.getElementById('emergency');
 
-    // Class Bonuses
-    const classBonuses = {
-      warrior: { health: 30, stress: 10, name: "Savaşçı" },
-      mage: { focus: 30, energy: -20, name: "Büyücü" },
-      rogue: { xpMultiplier: 1.5, money: -50, name: "Hırsız" }
-    };
-
-    // Skill Tree Options
-    const skillOptions = [
-      { name: "Sabahçı ☀️", desc: "Sabah görevlerinde +20% ödül", unlocked: false, cost: 50 },
-      { name: "Gece Kuşu 🌙", desc: "Akşam görevlerinde stres -10", unlocked: false, cost: 50 },
-      { name: "Sosyal 🗣️", desc: "Arkadaşlı görevlerde motivasyon +15", unlocked: false, cost: 75 },
-      { name: "Yalnız Kurt 🐺", desc: "Yalnız görevlerde enerji -10%", unlocked: false, cost: 75 },
-      { name: "Stres Yönetimi 🧘", desc: "Stres birikimi %30 azalır", unlocked: false, cost: 100 },
-      { name: "Motivasyon Uzmanı 💪", desc: "Motivasyon düşüşü %50 azalır", unlocked: false, cost: 100 }
-    ];
-
-    // Quests (Positive & Negative)
-    const quests = [
-      // POSITIVE
-      { text: "3 bardak su iç", xp: 10, health: 10, energy: -5, focus: 0, money: 0, stress: -5, motivation: 5, item: null, type: "positive" },
-      { text: "10 dakika derin nefes al", xp: 15, health: 15, energy: -10, focus: 5, money: 0, stress: -10, motivation: 10, item: null, type: "positive" },
-      { text: "Birine iltifat et", xp: 10, health: 5, energy: 0, focus: 0, money: 0, stress: -10, motivation: 15, item: null, type: "positive" },
-      { text: "5 dakika yürüyüş yap", xp: 25, health: 20, energy: -15, focus: 5, money: 0, stress: -5, motivation: 10, item: "Spor Ayakkabı 🏃‍♂️", type: "positive" },
-      { text: "Bir kitap sayfası oku", xp: 15, health: 0, energy: -10, focus: 10, money: 0, stress: -5, motivation: 5, item: "Bilgelik Kitabı 📖", type: "positive" },
-      { text: "Kahvaltını düzenle", xp: 20, health: 15, energy: -5, focus: 5, money: -10, stress: -10, motivation: 10, item: "Kahvaltı Tepsisi 🍳", type: "positive" },
-      { text: "Güneş ışığına 5 dakika maruz kal", xp: 20, health: 20, energy: -5, focus: 5, money: 0, stress: -10, motivation: 5, item: "Güneş Gözlüğü ☀️", type: "positive" },
-
-      // NEGATIVE / CHAOTIC
-      { text: "Alarmı 5 kez erteledin", xp: 0, health: -10, energy: -20, focus: -10, money: 0, stress: 15, motivation: -20, item: null, type: "negative" },
-      { text: "Kahveni döktün", xp: -5, health: 0, energy: -10, focus: -5, money: -5, stress: 10, motivation: -10, item: null, type: "negative" },
-      { text: "Telefonun bitti, şarj aletini unuttun", xp: 0, health: 0, energy: -30, focus: -20, money: 0, stress: 25, motivation: -15, item: null, type: "negative" },
-      { text: "Şemsiyeni unuttun, yağmurda kaldın", xp: -10, health: -15, energy: -20, focus: -10, money: 0, stress: 20, motivation: -25, item: "Islak Mont 🌧️ (Enerji -5 kalıcı)", type: "negative" },
-      { text: "Yanlış kişiye mesaj attın", xp: -15, health: 0, energy: -10, focus: -15, money: 0, stress: 30, motivation: -20, item: null, type: "negative" },
-      { text: "Uykusuz kaldın, film izledin", xp: 5, health: -20, energy: -40, focus: -15, money: -10, stress: 10, motivation: -5, item: "Karanlık Çember Gözlük 🌑", type: "negative" },
-      { text: "Market alışverişi unuttun", xp: 0, health: -5, energy: -10, focus: 0, money: 0, stress: 20, motivation: -10, item: null, type: "negative" }
-    ];
-
-    // Load Game
-    function loadGame() {
-      const saved = localStorage.getItem('lifeRPG2');
-      if (saved) {
-        gameState = JSON.parse(saved);
-        // Check if new day → reset streak if broken
-        const today = new Date().toDateString();
-        if (gameState.lastPlayed && gameState.lastPlayed !== today) {
-          const lastDate = new Date(gameState.lastPlayed);
-          const yesterday = new Date();
-          yesterday.setDate(yesterday.getDate() - 1);
-          if (lastDate.toDateString() !== yesterday.toDateString()) {
-            gameState.streak = 0;
-          }
-        }
-      } else {
-        // Initialize skill tree
-        gameState.skills = skillOptions.map(s => ({ ...s, unlocked: false }));
-      }
-      renderGame();
-    }
-
-    // Save Game
-    function saveGame() {
-      gameState.lastPlayed = new Date().toDateString();
-      localStorage.setItem('lifeRPG2', JSON.stringify(gameState));
-    }
-
-    // Render UI
-    function renderGame() {
-      if (!gameState.characterClass) {
-        classSelection.style.display = 'block';
-        gameArea.style.display = 'none';
-        return;
-      }
-
-      classSelection.style.display = 'none';
-      gameArea.style.display = 'block';
-
-      levelEl.textContent = gameState.level;
-      xpEl.textContent = gameState.xp;
-      nextLevelEl.textContent = gameState.nextLevel;
-      healthEl.textContent = gameState.health;
-      energyEl.textContent = gameState.energy;
-      focusEl.textContent = gameState.focus;
-      moneyEl.textContent = gameState.money;
-      stressEl.textContent = gameState.stress;
-      motivationEl.textContent = gameState.motivation;
-      streakEl.textContent = gameState.streak;
-
-      // Render inventory
-      inventoryList.innerHTML = '';
-      gameState.inventory.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'item';
-        div.textContent = item;
-        inventoryList.appendChild(div);
-      });
-
-      // Render skills
-      skillsList.innerHTML = '';
-      gameState.skills.forEach(skill => {
-        const div = document.createElement('div');
-        div.className = 'skill';
-        div.textContent = `${skill.name} — ${skill.desc}`;
-        if (skill.unlocked) {
-          div.style.color = '#50fa7b';
-          div.textContent = `✅ ${skill.name} — ${skill.desc}`;
-        } else {
-          div.textContent = `🔒 ${skill.name} — ${skill.desc} (XP: ${skill.cost})`;
-        }
-        skillsList.appendChild(div);
-      });
-
-      // Update quest box
-      if (gameState.currentQuest) {
-        questBox.textContent = gameState.currentQuest.text;
-        questBox.className = 'quest-box ' + (gameState.currentQuest.type === 'negative' ? 'negative' : '');
-        completeQuestBtn.disabled = false;
-        skipQuestBtn.disabled = false;
-      } else {
-        questBox.textContent = "Görev almak için 'Yeni Görev' butonuna bas!";
-        questBox.className = 'quest-box';
-        completeQuestBtn.disabled = true;
-        skipQuestBtn.disabled = true;
-      }
-    }
-
-    // Select Class
-    document.querySelectorAll('.class-btn').forEach(btn => {
+    // Tab System
+    document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', function() {
-        const className = this.dataset.class;
-        gameState.characterClass = className;
-        applyClassBonuses(className);
-        document.querySelectorAll('.class-btn').forEach(b => b.classList.remove('selected'));
-        this.classList.add('selected');
-        saveGame();
-        renderGame();
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        this.classList.add('active');
+        document.getElementById(this.dataset.tab + '-tab').classList.add('active');
       });
     });
 
-    function applyClassBonuses(className) {
-      const bonus = classBonuses[className];
-      gameState.health += bonus.health || 0;
-      gameState.focus += bonus.focus || 0;
-      gameState.energy += bonus.energy || 0;
-      gameState.money += bonus.money || 0;
-      gameState.xpMultiplier = bonus.xpMultiplier || 1;
-    }
-
-    // New Quest
-    function assignNewQuest() {
-      if (gameState.currentQuest) {
-        alert("Önce mevcut görevini tamamla veya geç!");
-        return;
-      }
-
-      // %30 ihtimalle negatif görev
-      const isNegative = Math.random() < 0.3;
-      const filteredQuests = quests.filter(q => 
-        (isNegative && q.type === 'negative') || (!isNegative && q.type === 'positive')
-      );
-
-      const randomQuest = filteredQuests[Math.floor(Math.random() * filteredQuests.length)];
-      gameState.currentQuest = randomQuest;
-      renderGame();
-    }
-
-    // Complete Quest
-    function completeCurrentQuest() {
-      if (!gameState.currentQuest) return;
-
-      const quest = gameState.currentQuest;
-
-      // Apply rewards/penalties
-      gameState.xp += Math.floor(quest.xp * (gameState.xpMultiplier || 1));
-      gameState.health = Math.max(0, Math.min(100, gameState.health + quest.health));
-      gameState.energy = Math.max(0, Math.min(100, gameState.energy + quest.energy));
-      gameState.focus = Math.max(0, Math.min(100, gameState.focus + quest.focus));
-      gameState.money = Math.max(0, gameState.money + quest.money);
-      gameState.stress = Math.max(0, Math.min(100, gameState.stress + quest.stress));
-      gameState.motivation = Math.max(0, Math.min(100, gameState.motivation + quest.motivation));
-
-      // Add item if any
-      if (quest.item && !gameState.inventory.includes(quest.item)) {
-        gameState.inventory.push(quest.item);
-        if (quest.type === 'negative') {
-          alert(`🌧️ Felaket eseri: ${quest.item}`);
-        } else {
-          alert(`🎁 Yeni eşya: ${quest.item}`);
+    // Decision Cards (Politikalar)
+    const policyDeck = [
+      {
+        title: "Vergi İndirimi",
+        desc: "Tüketici harcamalarını artırır ama bütçe açığı yaratır.",
+        cost: "Bütçe -100M, Borç +100M",
+        effect: () => {
+          gameState.money -= 100;
+          gameState.debt += 100;
+          gameState.approval = Math.min(100, gameState.approval + 5);
+          gameState.growth += 1;
+          logEvent("Cumhurbaşkanlığı, tüketici vergilerini düşürdü. Halk memnun, bütçe daraldı.", "positive");
+        }
+      },
+      {
+        title: "Kamu Personeli Alımı",
+        desc: "İşsizliği azaltır ama maliyetli.",
+        cost: "Bütçe -150M",
+        effect: () => {
+          gameState.money -= 150;
+          gameState.unemployment = Math.max(0, gameState.unemployment - 2);
+          gameState.approval = Math.min(100, gameState.approval + 7);
+          logEvent("10.000 yeni kamu görevlisi atandı. İşsizlik düştü!", "positive");
+        }
+      },
+      {
+        title: "Yabancı Yatırımcı Çek",
+        desc: "Ekonomiyi canlandırır ama bağımlılık yaratır.",
+        cost: "ABD +10, Rusya -5",
+        effect: () => {
+          gameState.usa = Math.min(100, gameState.usa + 10);
+          gameState.russia = Math.max(0, gameState.russia - 5);
+          gameState.money += 200;
+          gameState.growth += 2;
+          logEvent("Yeni teknoloji yatırımı için ABD ile anlaşma yapıldı.", "positive");
+        }
+      },
+      {
+        title: "Basın Yasası",
+        desc: "Muhalif sesleri bastırır ama kamuoyu düşer.",
+        cost: "Basın Özgürlüğü -20",
+        effect: () => {
+          gameState.press = Math.max(0, gameState.press - 20);
+          gameState.approval = Math.max(0, gameState.approval - 10);
+          gameState.stability = Math.min(100, gameState.stability + 5);
+          logEvent("Yeni basın yasası: 'Yalan haber' tanımı genişletildi.", "negative");
+        }
+      },
+      {
+        title: "Göçmen Geri Gönderme",
+        desc: "Kısa vadede popüler ama diplomatik kriz.",
+        cost: "AB -15, Rusya -10",
+        effect: () => {
+          gameState.eu = Math.max(0, gameState.eu - 15);
+          gameState.russia = Math.max(0, gameState.russia - 10);
+          gameState.refugees = Math.max(0, gameState.refugees - 30);
+          gameState.approval = Math.min(100, gameState.approval + 8);
+          logEvent("50.000 göçmen sınır dışı edildi. Halk alkışladı, AB kızdı.", "neutral");
+        }
+      },
+      {
+        title: "Enflasyonla Mücadele",
+        desc: "Faizleri artır, para arzını kısıtla.",
+        cost: "Büyüme -2, İşsizlik +3",
+        effect: () => {
+          gameState.inflation = Math.max(0, gameState.inflation - 3);
+          gameState.growth = Math.max(-5, gameState.growth - 2);
+          gameState.unemployment = Math.min(30, gameState.unemployment + 3);
+          logEvent("Merkez Bankası faizleri %5 artırdı. Enflasyon düştü ama büyüme durdu.", "neutral");
+        }
+      },
+      {
+        title: "Askeri Darbe Önleme",
+        desc: "Generallere rüşvet, istihbaratı güçlendir.",
+        cost: "Bütçe -200M, İstikrar +15",
+        effect: () => {
+          gameState.money -= 200;
+          gameState.stability = Math.min(100, gameState.stability + 15);
+          gameState.coupRisk = Math.max(0, gameState.coupRisk - 30);
+          logEvent("Askeri istihbarat birimi güçlendirildi. Darbe riski azaldı.", "positive");
+        }
+      },
+      {
+        title: "Yolsuzlukla Mücadele",
+        desc: "Halkın güvenini artırır ama siyasi maliyeti yüksek.",
+        cost: "Meclis Desteği -20",
+        effect: () => {
+          gameState.parliament = Math.max(0, gameState.parliament - 20);
+          gameState.approval = Math.min(100, gameState.approval + 15);
+          gameState.press = Math.min(100, gameState.press + 10);
+          logEvent("Büyük yolsuzluk operasyonu! 5 bakan gözaltında.", "positive");
         }
       }
+    ];
 
-      // Level up check
-      if (gameState.xp >= gameState.nextLevel) {
-        gameState.level++;
-        gameState.xp -= gameState.nextLevel;
-        gameState.nextLevel = Math.floor(gameState.nextLevel * 1.5);
-        alert(`🎉 SEVİYE ${gameState.level}'E YÜKSELDİN!`);
+    // Random Events
+    const randomEvents = [
+      {
+        condition: () => gameState.day % 7 === 0,
+        trigger: () => {
+          logEvent("Cumhurbaşkanı, halka doğrudan hitap etti: 'Güçlü Türkiye hedefindeyiz!'", "positive");
+          gameState.approval = Math.min(100, gameState.approval + 3);
+        }
+      },
+      {
+        condition: () => gameState.inflation > 15,
+        trigger: () => {
+          logEvent("⚠️ ENFLASYON KRİZİ: Halk marketlerde fiyat etiketlerini takip ediyor!", "negative");
+          gameState.approval = Math.max(0, gameState.approval - 5);
+          gameState.stability = Math.max(0, gameState.stability - 5);
+        }
+      },
+      {
+        condition: () => gameState.unemployment > 15,
+        trigger: () => {
+          logEvent("⚠️ GENÇLER SOKAKTA: 'İş yok, umut yok' protestoları başladı.", "negative");
+          gameState.approval = Math.max(0, gameState.approval - 7);
+          gameState.stability = Math.max(0, gameState.stability - 10);
+        }
+      },
+      {
+        condition: () => gameState.press < 30,
+        trigger: () => {
+          logEvent("⚠️ MEDYA KRİZİ: 3 büyük gazete kapatıldı. Uluslararası tepkiler arttı.", "negative");
+          gameState.usa = Math.max(0, gameState.usa - 10);
+          gameState.eu = Math.max(0, gameState.eu - 15);
+        }
+      },
+      {
+        condition: () => gameState.coupRisk > 50,
+        trigger: () => {
+          logEvent("🚨 DARBE TEHDİDİ: Askeri birlikler başkente doğru hareket ediyor!", "negative");
+          gameState.stability = Math.max(0, gameState.stability - 20);
+          if (Math.random() < 0.3 && gameState.stability < 30) {
+            alert("💥 DARBE BAŞARILI! Oyunu kaybettiniz.");
+            resetGame();
+          }
+        }
+      },
+      {
+        condition: () => gameState.day % 30 === 0 && gameState.elections < 3,
+        trigger: () => {
+          logEvent("🗳️ SEÇİM ZAMANI: Halk sandık başına gidiyor...", "neutral");
+          setTimeout(() => holdElection(), 2000);
+        }
+      },
+      {
+        condition: () => Math.random() < 0.05,
+        trigger: () => {
+          const disasters = [
+            "🌋 Ege’de volkanik aktivite! Turizm sektörü çöktü. -50M$",
+            "🦠 SALGIN: Hastaneler doldu. Sağlık bütçesi +100M$",
+            "💧 KURAKLIK: Tarım üretimi yarıya düştü. Gıda fiyatları +20%",
+            "🛢️ ALTIN BULUNDU: Doğu Anadolu’da yeni maden! +300M$"
+          ];
+          const event = disasters[Math.floor(Math.random() * disasters.length)];
+          logEvent(`🌍 RASTGELE OLAY: ${event}`, event.includes("ALTIN") ? "positive" : "negative");
+          
+          if (event.includes("ALTIN")) gameState.money += 300;
+          if (event.includes("KURAKLIK")) gameState.inflation += 5;
+          if (event.includes("SALGIN")) gameState.money -= 100;
+          if (event.includes("volkanik")) gameState.money -= 50;
+        }
+      }
+    ];
+
+    // Functions
+    function logEvent(text, type = "neutral") {
+      const div = document.createElement('div');
+      div.className = `event-item ${type}`;
+      div.textContent = `Gün ${gameState.day}: ${text}`;
+      eventLog.prepend(div);
+      if (eventLog.children.length > 50) eventLog.removeChild(eventLog.lastChild);
+    }
+
+    function renderGame() {
+      dayEl.textContent = gameState.day;
+      moneyEl.textContent = gameState.money;
+      approvalEl.textContent = `${gameState.approval}%`;
+      stabilityEl.textContent = `${gameState.stability}%`;
+      inflationEl.textContent = `${gameState.inflation}%`;
+      unemploymentEl.textContent = `${gameState.unemployment}%`;
+      growthEl.textContent = `${gameState.growth}%`;
+      debtEl.textContent = gameState.debt;
+      parliamentEl.textContent = `${gameState.parliament}%`;
+      pressEl.textContent = `${gameState.press}%`;
+      electionsEl.textContent = gameState.elections;
+      euEl.textContent = `${gameState.eu}%`;
+      usaEl.textContent = `${gameState.usa}%`;
+      russiaEl.textContent = `${gameState.russia}%`;
+      refugeesEl.textContent = `${gameState.refugees}K`;
+
+      // Render decisions
+      decisionsContainer.innerHTML = '';
+      policyDeck.slice(0, 6).map(policy => {
+        const card = document.createElement('div');
+        card.className = 'decision-card';
+        card.innerHTML = `
+          <h4>${policy.title}</h4>
+          <p>${policy.desc}</p>
+          <p class="decision-cost">${policy.cost}</p>
+        `;
+        card.addEventListener('click', () => {
+          if (gameState.money < 0 && policy.title.includes("Bütçe")) {
+            alert("Cumhurbaşkanım, hazinede para yok!");
+            return;
+          }
+          policy.effect();
+          renderGame();
+        });
+        decisionsContainer.appendChild(card);
+      });
+    }
+
+    function nextDay() {
+      gameState.day++;
+
+      // Daily auto-changes
+      gameState.money += Math.floor(gameState.growth * 10); // GDP growth effect
+      gameState.inflation += (Math.random() - 0.5) * 0.5; // Random inflation fluctuation
+      gameState.inflation = Math.max(0, gameState.inflation);
+      gameState.crisisLevel = Math.max(0, gameState.crisisLevel - 1);
+      gameState.coupRisk = Math.max(0, gameState.coupRisk - 1);
+
+      // Trigger random events
+      randomEvents.forEach(event => {
+        if (event.condition()) event.trigger();
+      });
+
+      // Auto crisis if approval < 30
+      if (gameState.approval < 30) {
+        gameState.coupRisk += 2;
+        gameState.stability = Math.max(0, gameState.stability - 1);
       }
 
-      // Streak
-      gameState.streak++;
-      if (gameState.streak % 7 === 0) {
-        alert(`🏆 7 GÜNLÜK STREAK! Özel ödül: Motivasyon +30`);
-        gameState.motivation = Math.min(100, gameState.motivation + 30);
-      }
-
-      // Clear quest
-      gameState.currentQuest = null;
-      saveGame();
       renderGame();
     }
 
-    // Skip Quest (Penalty)
-    function skipCurrentQuest() {
-      if (!gameState.currentQuest) return;
-      alert("❌ Görevi geçtin! Stres +20, XP -10");
-      gameState.stress = Math.min(100, gameState.stress + 20);
-      gameState.xp = Math.max(0, gameState.xp - 10);
-      gameState.currentQuest = null;
-      saveGame();
+    function holdElection() {
+      const baseChance = 40;
+      const approvalBonus = gameState.approval * 0.6;
+      const economyBonus = (10 - gameState.unemployment) * 2;
+      const stabilityBonus = gameState.stability * 0.3;
+      const totalChance = baseChance + approvalBonus + economyBonus + stabilityBonus;
+
+      const won = Math.random() * 100 < totalChance;
+
+      if (won) {
+        gameState.elections++;
+        gameState.approval = Math.min(100, gameState.approval + 10);
+        logEvent(`🎉 SEÇİM ZAFERİ! ${gameState.elections}. kez cumhurbaşkanı seçildiniz.`, "positive");
+      } else {
+        logEvent("💀 SEÇİMİ KAYBETTİNİZ! Muhalefet iktidarı devraldı.", "negative");
+        alert("Cumhurbaşkanlığı göreviniz sona erdi. Oyun bitti.");
+        resetGame();
+      }
+    }
+
+    function declareEmergency() {
+      if (gameState.stability < 40) {
+        alert("Cumhurbaşkanım, istikrar çok düşük. OHAL ilan edemezsiniz!");
+        return;
+      }
+      gameState.stability = Math.min(100, gameState.stability + 20);
+      gameState.press = Math.max(0, gameState.press - 30);
+      gameState.approval = Math.max(0, gameState.approval - 15);
+      logEvent("🚨 OLAĞANÜSTÜ HAL İLAN EDİLDİ! Basın sansürü, seyahat yasağı.", "negative");
+      renderGame();
+    }
+
+    function saveGame() {
+      localStorage.setItem('countrySim', JSON.stringify(gameState));
+      alert("Cumhurbaşkanı, devletin durumu arşivlendi. 💾");
+    }
+
+    function loadGame() {
+      const saved = localStorage.getItem('countrySim');
+      if (saved) {
+        gameState = JSON.parse(saved);
+        alert("Cumhurbaşkanı, arşivden devam ediliyor. 📂");
+        renderGame();
+      } else {
+        alert("Arşiv bulunamadı. Yeni bir cumhuriyet kurun!");
+      }
+    }
+
+    function resetGame() {
+      gameState = {
+        day: 1, money: 1000, approval: 65, stability: 80, inflation: 5,
+        unemployment: 8, growth: 2, debt: 500, parliament: 55, press: 70,
+        elections: 0, eu: 40, usa: 60, russia: 50, refugees: 100,
+        policies: [], events: [], crisisLevel: 0, coupRisk: 0, lastElectionDay: 0,
+        ministers: { economy: "Ahmet Yılmaz", foreign: "Ayşe Kaya", interior: "Mehmet Demir" }
+      };
       renderGame();
     }
 
     // Event Listeners
-    newQuestBtn.addEventListener('click', assignNewQuest);
-    completeQuestBtn.addEventListener('click', completeCurrentQuest);
-    skipQuestBtn.addEventListener('click', skipCurrentQuest);
+    nextDayBtn.addEventListener('click', nextDay);
+    saveGameBtn.addEventListener('click', saveGame);
+    loadGameBtn.addEventListener('click', loadGame);
+    startElectionBtn.addEventListener('click', holdElection);
+    emergencyBtn.addEventListener('click', declareEmergency);
 
     // Initialize
-    loadGame();
+    renderGame();
   </script>
 </body>
 </html>
