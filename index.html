@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hayatın RPG Oyunu 🎮</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 500px;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 20px;
+      text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-around;
+      margin: 20px 0;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    .stat {
+      background: rgba(0,0,0,0.2);
+      padding: 10px;
+      border-radius: 10px;
+      min-width: 80px;
+    }
+
+    .level {
+      font-size: 1.5rem;
+      margin: 15px 0;
+      color: #FFD700;
+    }
+
+    button {
+      background: #FF6B6B;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      margin: 10px 5px;
+      border-radius: 50px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 10px rgba(255,107,107,0.4);
+    }
+
+    button:hover {
+      background: #FF5252;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(255,107,107,0.6);
+    }
+
+    .quest-box {
+      background: rgba(0,0,0,0.2);
+      padding: 20px;
+      border-radius: 15px;
+      margin: 20px 0;
+      min-height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      text-align: center;
+    }
+
+    .inventory {
+      margin-top: 30px;
+      width: 100%;
+    }
+
+    .inventory h3 {
+      margin-bottom: 10px;
+      font-size: 1.3rem;
+    }
+
+    .item {
+      background: rgba(255,255,255,0.15);
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 8px;
+      font-size: 0.95rem;
+    }
+
+    .completed {
+      opacity: 0.6;
+      text-decoration: line-through;
+    }
+
+    footer {
+      margin-top: 30px;
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    @media (max-width: 600px) {
+      .stats {
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .stat {
+        min-width: 70px;
+        font-size: 0.9rem;
+        padding: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎮 Hayatın RPG Oyunu</h1>
+    <div class="level">Seviye: <span id="level">1</span></div>
+    <div class="stats">
+      <div class="stat">XP: <span id="xp">0</span>/<span id="nextLevel">100</span></div>
+      <div class="stat">🩷 Sağlık: <span id="health">100</span></div>
+      <div class="stat">🎯 Odak: <span id="focus">50</span></div>
+    </div>
+
+    <div class="quest-box" id="questBox">
+      Görev almak için "Yeni Görev" butonuna bas!
+    </div>
+
+    <button id="newQuest">✨ Yeni Görev</button>
+    <button id="completeQuest" disabled>✅ Görevi Tamamla</button>
+    <button id="rest">🛌 Dinlen (Sağlık +20)</button>
+
+    <div class="inventory">
+      <h3>🎒 Eşyaların</h3>
+      <div id="inventoryList">
+        <div class="item">Başlangıç çantası 🎒</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    İlerlemen otomatik kaydedilir. Her gün yeni maceralar! 🌞
+  </footer>
+
+  <script>
+    // State
+    let gameState = {
+      level: 1,
+      xp: 0,
+      health: 100,
+      focus: 50,
+      inventory: ["Başlangıç çantası 🎒"],
+      currentQuest: null,
+      nextLevel: 100
+    };
+
+    // DOM Elements
+    const levelEl = document.getElementById('level');
+    const xpEl = document.getElementById('xp');
+    const nextLevelEl = document.getElementById('nextLevel');
+    const healthEl = document.getElementById('health');
+    const focusEl = document.getElementById('focus');
+    const questBox = document.getElementById('questBox');
+    const newQuestBtn = document.getElementById('newQuest');
+    const completeQuestBtn = document.getElementById('completeQuest');
+    const restBtn = document.getElementById('rest');
+    const inventoryList = document.getElementById('inventoryList');
+
+    // Quest Pool
+    const quests = [
+      { text: "3 bardak su iç", xp: 10, health: 10, focus: 0, item: null },
+      { text: "10 dakika derin nefes al", xp: 15, health: 15, focus: 5, item: null },
+      { text: "1 saat ekran süresini azalt", xp: 20, health: 5, focus: 10, item: "Mavi Işık Filtresi 🕶️ (%10 odak artırır)" },
+      { text: "Birine iltifat et", xp: 10, health: 5, focus: 0, item: null },
+      { text: "5 dakika yürüyüş yap", xp: 25, health: 20, focus: 5, item: "Spor Ayakkabı 🏃‍♂️ (Sağlık +5)" },
+      { text: "Bir kitap sayfası oku", xp: 15, health: 0, focus: 10, item: "Bilgelik Kitabı 📖 (Odak +5)" },
+      { text: "Kahvaltını düzenle", xp: 20, health: 15, focus: 5, item: "Kahvaltı Tepsisi 🍳 (Sağlık +10)" },
+      { text: "Telefonunu sessize al ve 30 dakika unut", xp: 30, health: 10, focus: 20, item: "Dijital Arınma Amuleti 📵 (Odak +10)" },
+      { text: "Bir şeyleri düzenle (çekmecen, masan...)", xp: 25, health: 5, focus: 15, item: "Düzen Büyüsü 🧹 (Odak +5)" },
+      { text: "Güneş ışığına 5 dakika maruz kal", xp: 20, health: 20, focus: 5, item: "Güneş Gözlüğü ☀️ (Sağlık +5)" }
+    ];
+
+    // Load Game
+    function loadGame() {
+      const saved = localStorage.getItem('lifeRPG');
+      if (saved) {
+        gameState = JSON.parse(saved);
+      }
+      renderGame();
+    }
+
+    // Save Game
+    function saveGame() {
+      localStorage.setItem('lifeRPG', JSON.stringify(gameState));
+    }
+
+    // Render UI
+    function renderGame() {
+      levelEl.textContent = gameState.level;
+      xpEl.textContent = gameState.xp;
+      nextLevelEl.textContent = gameState.nextLevel;
+      healthEl.textContent = gameState.health;
+      focusEl.textContent = gameState.focus;
+
+      // Render inventory
+      inventoryList.innerHTML = '';
+      gameState.inventory.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'item';
+        div.textContent = item;
+        inventoryList.appendChild(div);
+      });
+
+      // Update quest button states
+      if (gameState.currentQuest) {
+        questBox.textContent = gameState.currentQuest.text;
+        completeQuestBtn.disabled = false;
+      } else {
+        questBox.textContent = "Görev almak için 'Yeni Görev' butonuna bas!";
+        completeQuestBtn.disabled = true;
+      }
+    }
+
+    // New Quest
+    function assignNewQuest() {
+      if (gameState.currentQuest) {
+        alert("Önce mevcut görevini tamamla veya vazgeç!");
+        return;
+      }
+      const randomQuest = quests[Math.floor(Math.random() * quests.length)];
+      gameState.currentQuest = randomQuest;
+      renderGame();
+    }
+
+    // Complete Quest
+    function completeCurrentQuest() {
+      if (!gameState.currentQuest) return;
+
+      const quest = gameState.currentQuest;
+
+      // Apply rewards
+      gameState.xp += quest.xp;
+      gameState.health = Math.min(100, gameState.health + quest.health);
+      gameState.focus = Math.min(100, gameState.focus + quest.focus);
+
+      // Check level up
+      if (gameState.xp >= gameState.nextLevel) {
+        gameState.level++;
+        gameState.xp -= gameState.nextLevel;
+        gameState.nextLevel = Math.floor(gameState.nextLevel * 1.5);
+        alert(`🎉 TEBRİKLER! Seviye ${gameState.level}'e yükseldin!`);
+      }
+
+      // Add item if any
+      if (quest.item && !gameState.inventory.includes(quest.item)) {
+        gameState.inventory.push(quest.item);
+        alert(`🎁 Yeni eşya kazandın: ${quest.item}`);
+      }
+
+      // Clear current quest
+      gameState.currentQuest = null;
+      saveGame();
+      renderGame();
+    }
+
+    // Rest
+    function rest() {
+      gameState.health = Math.min(100, gameState.health + 20);
+      saveGame();
+      renderGame();
+      alert("💤 Dinlendin! Sağlık +20");
+    }
+
+    // Event Listeners
+    newQuestBtn.addEventListener('click', assignNewQuest);
+    completeQuestBtn.addEventListener('click', completeCurrentQuest);
+    restBtn.addEventListener('click', rest);
+
+    // Initialize
+    loadGame();
+  </script>
+</body>
+</html>
